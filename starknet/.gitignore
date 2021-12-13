@@ -1,0 +1,8 @@
+/node_modules
+.env
+/cache
+/venv
+
+# testing
+.pytest_cache
+/contracts_tests/__pycache__

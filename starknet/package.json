@@ -1,0 +1,19 @@
+{
+  "name": "mekhenty",
+  "version": "1.0.0",
+  "scripts": {
+    "test:mocha": "npx hardhat test",
+    "test:pytest": "pytest contracts_tests/test_bridged721.py -v",
+    "compile": "npx hardhat starknet-compile"
+  },
+  "dependencies": {
+    "@shardlabs/starknet-hardhat-plugin": "^0.3.0"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.2.22",
+    "@types/mocha": "^9.0.0",
+    "chai": "^4.3.4",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.2"
+  }
+}

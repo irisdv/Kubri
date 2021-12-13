@@ -1,0 +1,13 @@
+[
+    {
+        "inputs": [
+            {
+                "name": "l1_gateway_address",
+                "type": "felt"
+            }
+        ],
+        "name": "initialize",
+        "outputs": [],
+        "type": "function"
+    }
+]
