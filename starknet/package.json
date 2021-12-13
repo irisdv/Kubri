@@ -6,10 +6,8 @@
     "test:pytest": "pytest contracts_tests/test_bridged721.py -v",
     "compile": "npx hardhat starknet-compile"
   },
-  "dependencies": {
-    "@shardlabs/starknet-hardhat-plugin": "^0.3.0"
-  },
   "devDependencies": {
+    "@shardlabs/starknet-hardhat-plugin": "^0.3.5",
     "@types/chai": "^4.2.22",
     "@types/mocha": "^9.0.0",
     "chai": "^4.3.4",

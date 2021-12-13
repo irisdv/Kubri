@@ -13,7 +13,7 @@ module.exports = {
     }
   },
   mocha: {
-    // starknetNetwork: "devnet"
-    starknetNetwork: "alpha"
+    starknetNetwork: "devnet"
+    // starknetNetwork: "alpha"
   }
 };

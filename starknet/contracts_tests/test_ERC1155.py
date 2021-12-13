@@ -31,7 +31,7 @@ async def erc1155_factory():
     await operator.initialize(operator.contract_address).invoke()
 
     erc1155 = await starknet.deploy(
-        "contracts/ERC1155/ERC1155.cairo",
+        "contracts/ERC1155.cairo",
         constructor_calldata=[
             account.contract_address, 
             # Initialize with 1000 of token_id = 1 and 500 of token_id = 2

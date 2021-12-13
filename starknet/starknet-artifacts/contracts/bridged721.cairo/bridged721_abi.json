@@ -28,19 +28,7 @@
             }
         ],
         "name": "TokenUri",
-        "size": 5,
-        "type": "struct"
-    },
-    {
-        "members": [
-            {
-                "name": "a",
-                "offset": 0,
-                "type": "felt"
-            }
-        ],
-        "name": "TokenId",
-        "size": 1,
+        "size": 7,
         "type": "struct"
     },
     {
@@ -53,6 +41,28 @@
         ],
         "name": "BlockchainNamespace",
         "size": 1,
+        "type": "struct"
+    },
+    {
+        "members": [
+            {
+                "name": "a",
+                "offset": 0,
+                "type": "felt"
+            },
+            {
+                "name": "b",
+                "offset": 1,
+                "type": "felt"
+            },
+            {
+                "name": "c",
+                "offset": 2,
+                "type": "felt"
+            }
+        ],
+        "name": "TokenId",
+        "size": 3,
         "type": "struct"
     },
     {
@@ -94,28 +104,12 @@
     {
         "inputs": [
             {
-                "name": "recipient",
+                "name": "_l1_address",
                 "type": "felt"
             },
             {
-                "name": "tokens_id_len",
+                "name": "_gateway_address",
                 "type": "felt"
-            },
-            {
-                "name": "tokens_id",
-                "type": "felt*"
-            },
-            {
-                "name": "amounts_len",
-                "type": "felt"
-            },
-            {
-                "name": "amounts",
-                "type": "felt*"
-            },
-            {
-                "name": "uri_",
-                "type": "TokenUri"
             }
         ],
         "name": "constructor",
@@ -125,50 +119,34 @@
     {
         "inputs": [
             {
-                "name": "tokens_id_len",
+                "name": "_l1_address",
                 "type": "felt"
             },
             {
-                "name": "tokens_id",
-                "type": "felt*"
-            },
-            {
-                "name": "amounts_len",
+                "name": "_gateway_address",
                 "type": "felt"
             },
             {
-                "name": "amounts",
-                "type": "felt*"
+                "name": "name",
+                "type": "felt"
             },
             {
-                "name": "uri_",
+                "name": "symbol",
+                "type": "felt"
+            },
+            {
+                "name": "tokenURI",
                 "type": "TokenUri"
             }
         ],
-        "name": "initialize_batch",
+        "name": "initialize",
         "outputs": [],
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "uri",
-        "outputs": [
-            {
-                "name": "res",
-                "type": "TokenUri"
-            }
-        ],
-        "stateMutability": "view",
         "type": "function"
     },
     {
         "inputs": [
             {
                 "name": "owner",
-                "type": "felt"
-            },
-            {
-                "name": "token_id",
                 "type": "felt"
             }
         ],
@@ -185,31 +163,39 @@
     {
         "inputs": [
             {
-                "name": "owners_len",
+                "name": "token_id",
                 "type": "felt"
-            },
-            {
-                "name": "owners",
-                "type": "felt*"
-            },
-            {
-                "name": "tokens_id_len",
-                "type": "felt"
-            },
-            {
-                "name": "tokens_id",
-                "type": "felt*"
             }
         ],
-        "name": "balance_of_batch",
+        "name": "owner_of",
         "outputs": [
             {
-                "name": "res_len",
+                "name": "res",
                 "type": "felt"
-            },
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "name",
+        "outputs": [
             {
                 "name": "res",
-                "type": "felt*"
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "symbol",
+        "outputs": [
+            {
+                "name": "res",
+                "type": "felt"
             }
         ],
         "stateMutability": "view",
@@ -218,7 +204,56 @@
     {
         "inputs": [
             {
-                "name": "account",
+                "name": "token_id",
+                "type": "felt"
+            }
+        ],
+        "name": "token_uri",
+        "outputs": [
+            {
+                "name": "res",
+                "type": "TokenUri"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "to",
+                "type": "felt"
+            },
+            {
+                "name": "token_id",
+                "type": "felt"
+            }
+        ],
+        "name": "approve",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "token_id",
+                "type": "felt"
+            }
+        ],
+        "name": "get_approved",
+        "outputs": [
+            {
+                "name": "res",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "owner",
                 "type": "felt"
             },
             {
@@ -264,90 +299,86 @@
             {
                 "name": "token_id",
                 "type": "felt"
-            },
-            {
-                "name": "amount",
-                "type": "felt"
             }
         ],
-        "name": "safe_transfer_from",
+        "name": "transfer_from",
         "outputs": [],
         "type": "function"
     },
     {
         "inputs": [
             {
-                "name": "_from",
-                "type": "felt"
-            },
-            {
-                "name": "to",
-                "type": "felt"
-            },
-            {
-                "name": "tokens_id_len",
-                "type": "felt"
-            },
-            {
-                "name": "tokens_id",
-                "type": "felt*"
-            },
-            {
-                "name": "amounts_len",
-                "type": "felt"
-            },
-            {
-                "name": "amounts",
-                "type": "felt*"
-            }
-        ],
-        "name": "safe_batch_transfer_from",
-        "outputs": [],
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "name": "_from",
+                "name": "owner",
                 "type": "felt"
             },
             {
                 "name": "token_id",
                 "type": "felt"
-            },
-            {
-                "name": "amount",
-                "type": "felt"
             }
         ],
-        "name": "_burn",
+        "name": "create_token",
         "outputs": [],
         "type": "function"
     },
     {
         "inputs": [
             {
-                "name": "_from",
+                "name": "token_id",
                 "type": "felt"
-            },
-            {
-                "name": "tokens_id_len",
-                "type": "felt"
-            },
-            {
-                "name": "tokens_id",
-                "type": "felt*"
-            },
-            {
-                "name": "amounts_len",
-                "type": "felt"
-            },
-            {
-                "name": "amounts",
-                "type": "felt*"
             }
         ],
-        "name": "_burn_batch",
+        "name": "delete_token",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_l1_address",
+        "outputs": [
+            {
+                "name": "address",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_gateway_address",
+        "outputs": [
+            {
+                "name": "res",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_initialized",
+        "outputs": [
+            {
+                "name": "res",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "to",
+                "type": "felt"
+            },
+            {
+                "name": "token_id",
+                "type": "felt"
+            }
+        ],
+        "name": "initialize_nft",
         "outputs": [],
         "type": "function"
     }

@@ -3,8 +3,8 @@ import { starknet } from "hardhat";
 import { StarknetContract, StarknetContractFactory } from "hardhat/types/runtime";
 
 describe("Starknet bridge", function () {
-    this.timeout(300_000); // 5 min - recommended if used with Alpha testnet
-    // this.timeout(60_000); // 30 seconds - recommended if used with starknet-devnet
+    // this.timeout(300_000); // 5 min - recommended if used with Alpha testnet
+    this.timeout(60_000); // 30 seconds - recommended if used with starknet-devnet
 
     const L1_ERC721_ADDRESS="0xb5AAc9C30121496b89425f92D1b45336E4704F8e"
     const L1_GATEWAY_ADDRESS="0xdEd902a56c111FD3443F9058507dfb578b32bbd4"
@@ -32,25 +32,22 @@ describe("Starknet bridge", function () {
       accountFactory = await starknet.getContractFactory("account");
     });
 
-    // it("Deploy Account.cairo", async function () {
+    it("Deploy Account.cairo", async function () {
       
-      // console.log("Started account.cairo contract deployment");
-      // contractAccount = await accountFactory.deploy({_public_key: BigInt("1903647282632399027225629500434100617446916994367413898913170243228889244137")});
-      // ACCOUNT_ADDRESS = contractAccount.address;
-      // console.log("Account contract deployed at", ACCOUNT_ADDRESS);
+      console.log("Started account.cairo contract deployment");
+      contractAccount = await accountFactory.deploy({_public_key: BigInt("1903647282632399027225629500434100617446916994367413898913170243228889244137")});
+      ACCOUNT_ADDRESS = contractAccount.address;
+      console.log("Account contract deployed at", ACCOUNT_ADDRESS);
 
       // ACCOUNT_ADDRESS = "0x07570b45f89403a03feacdab5a6d7d79c43b7501baa8e36b909f14e6148f18c7"
       // console.log("Account contract deployed at", ACCOUNT_ADDRESS);
       // contractAccount = accountFactory.getContractAt(ACCOUNT_ADDRESS);
 
-      // await account.initialize(account.contract_address).invoke()
-      // puis dans chaque fonction mon premier argument devrait être contractAccount.contract_address ou bien ACCOUNT_ADDRESS
-
       // const { res } = await contractGateway.call("get_l1_gateway");
       // console.log('l1_gateway in gateway.cairo is initialized to:', res);
       // expect(res).to.deep.equal(BigInt(L1_GATEWAY_ADDRESS));
 
-    // });
+    });
 
     it("Should work if right arguments given in gateway.cairo constructor ", async function () {
       

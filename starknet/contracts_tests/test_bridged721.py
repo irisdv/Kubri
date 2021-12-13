@@ -10,7 +10,7 @@ L1_TOKEN_ADDRESS = 0x1
 BRIDGE_MODE_WITHDRAW = 1
 
 L2_CONTRACTS_DIR = os.path.join(os.getcwd(), "contracts")
-ERC721_FILE = os.path.join(L2_CONTRACTS_DIR, "ERC721/bridged721.cairo")
+ERC721_FILE = os.path.join(L2_CONTRACTS_DIR, "bridged721.cairo")
 ACCOUNT_FILE = os.path.join(L2_CONTRACTS_DIR, "account.cairo")
 BRIDGE_FILE = os.path.join(L2_CONTRACTS_DIR, "gateway.cairo")
 
