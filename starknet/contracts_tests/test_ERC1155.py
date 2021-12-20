@@ -25,39 +25,59 @@ other = Signer(123456789987654321)
 @pytest.mark.asyncio
 async def test_erc1155_factory():
     L2_CONTRACTS_DIR = os.path.join(os.getcwd(), "contracts")
+    ERC1155_GATWAY = os.path.join(L2_CONTRACTS_DIR, "gateway1155.cairo")
     ERC1155_FILE = os.path.join(L2_CONTRACTS_DIR, "bridged1155.cairo")
     ACCOUNT_FILE = os.path.join(L2_CONTRACTS_DIR, "Account.cairo")
     print("svdsvds")
     print(L2_CONTRACTS_DIR)
     print(ERC1155_FILE)
     print("svdsvds")
+    tokens_id = [1, 2]
+    amounts = [2, 3]
     starknet = await Starknet.empty()
-    account = await starknet.deploy(
-        ACCOUNT_FILE,
-        constructor_calldata=[signer.public_key]
+    # account = await starknet.deploy(
+    #     ACCOUNT_FILE,
+    #     constructor_calldata=[signer.public_key]
+    # )
+    # print(account)
+    # operator = await starknet.deploy(
+    #     ACCOUNT_FILE,
+    #     constructor_calldata=[other.public_key]
+    # )
+    # print(operator)
+    # await account.initialize(account.contract_address).invoke()
+    # await operator.initialize(operator.contract_address).invoke()
+    gateway1155 = await starknet.deploy(
+        ERC1155_GATWAY,
+        constructor_calldata=[
+            0x5a25A58bFC99eA3Aef632276Cf84D462F75F633E
+            # Initialize with 1000 of token_id = 1 and 500 of token_id = 2
+            #2, 1, 2, 2, 2, 3, 
+            # Initialize URI : cairo:1/erc1155:12345678912345678912/{id}
+            # As defined in CAIP-29 : {blockchain_namespace}:{blockchain_reference}/{asset_namespace}:{asset_reference}/{token_id}0x525a965ad75ce8c899df8b936b980efc2eb61813281917c1cefefc570aa101d
+            #int.from_bytes("eip155".encode("ascii"), 'big'), 1, int.from_bytes("erc1155".encode("ascii"), 'big'), 0x056bfe4139dd88d0a9ff44e3166cb781e002f052b4884e6f56e51b11bebee599 , int.from_bytes("{id}".encode("ascii"), 'big')
+        ]
     )
-    print(account)
-    operator = await starknet.deploy(
-        ACCOUNT_FILE,
-        constructor_calldata=[other.public_key]
-    )
-    print(operator)
-    await account.initialize(account.contract_address).invoke()
-    await operator.initialize(operator.contract_address).invoke()
-
+    print(gateway1155.contract_address)
     erc1155 = await starknet.deploy(
         ERC1155_FILE,
         constructor_calldata=[
-            account.contract_address, 
+            gateway1155.contract_address, 
+            0x9aCb0D74c8DbF3aa12f048882D602f813d615F6f
             # Initialize with 1000 of token_id = 1 and 500 of token_id = 2
-            2, 1, 2, 2, 1000, 500, 
+            #2, 1, 2, 2, 2, 3, 
             # Initialize URI : cairo:1/erc1155:12345678912345678912/{id}
             # As defined in CAIP-29 : {blockchain_namespace}:{blockchain_reference}/{asset_namespace}:{asset_reference}/{token_id}0x525a965ad75ce8c899df8b936b980efc2eb61813281917c1cefefc570aa101d
-            int.from_bytes("eip155".encode("ascii"), 'big'), 1, int.from_bytes("erc1155".encode("ascii"), 'big'), 0x056bfe4139dd88d0a9ff44e3166cb781e002f052b4884e6f56e51b11bebee599 , int.from_bytes("{id}".encode("ascii"), 'big')
+            #int.from_bytes("eip155".encode("ascii"), 'big'), 1, int.from_bytes("erc1155".encode("ascii"), 'big'), 0x056bfe4139dd88d0a9ff44e3166cb781e002f052b4884e6f56e51b11bebee599 , int.from_bytes("{id}".encode("ascii"), 'big')
         ]
     )
     print(erc1155)
-    return starknet, erc1155, account, operator
+    await erc1155.initialize_nft_batch(0x525a965ad75ce8c899df8b936b980efc2eb61813281917c1cefefc570aa101d, tokens_id, amounts ).invoke()
+    assert (await erc1155.balance_of(0x525a965ad75ce8c899df8b936b980efc2eb61813281917c1cefefc570aa101d, 1).call()).result == (2,)
+    assert (await erc1155.balance_of(0x525a965ad75ce8c899df8b936b980efc2eb61813281917c1cefefc570aa101d, 2).call()).result == (3,)
+
+    
+    return starknet, erc1155
 
 
 # @pytest.mark.asyncio

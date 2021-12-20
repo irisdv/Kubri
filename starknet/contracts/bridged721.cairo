@@ -100,7 +100,8 @@ end
 
 @external
 func initialize{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-        _l1_address : felt, _gateway_address : felt, name : felt, symbol : felt, tokenURI : TokenUri):
+        _l1_address : felt, _gateway_address : felt, name : felt, symbol : felt,
+        tokenURI : TokenUri):
     let (_initialized) = initialized.read()
     assert _initialized = 0
 
@@ -351,7 +352,7 @@ func get_l1_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     return (address)
 end
 
-########## functions for testing purposes #######
+# ######### functions for testing purposes #######
 
 @view
 func get_gateway_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
@@ -370,14 +371,13 @@ end
 # function to create an NFT (testing purposes for now. Misses name, symbol and tokenURI)
 @external
 func initialize_nft{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    to : felt, token_id : felt):
-
+        to : felt, token_id : felt):
     let (_minted) = minted.read()
     assert _minted = 0
 
-    _mint(to,token_id) 
+    _mint(to, token_id)
 
     minted.write(1)
 
-    return()
+    return ()
 end

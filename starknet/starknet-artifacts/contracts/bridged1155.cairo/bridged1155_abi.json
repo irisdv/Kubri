@@ -39,6 +39,18 @@
                 "type": "felt"
             }
         ],
+        "name": "AssetNamespace",
+        "size": 1,
+        "type": "struct"
+    },
+    {
+        "members": [
+            {
+                "name": "a",
+                "offset": 0,
+                "type": "felt"
+            }
+        ],
         "name": "AssetReference",
         "size": 1,
         "type": "struct"
@@ -80,42 +92,14 @@
         "type": "struct"
     },
     {
-        "members": [
-            {
-                "name": "a",
-                "offset": 0,
-                "type": "felt"
-            }
-        ],
-        "name": "AssetNamespace",
-        "size": 1,
-        "type": "struct"
-    },
-    {
         "inputs": [
             {
                 "name": "recipient",
                 "type": "felt"
             },
             {
-                "name": "tokens_id_len",
+                "name": "address_l1",
                 "type": "felt"
-            },
-            {
-                "name": "tokens_id",
-                "type": "felt*"
-            },
-            {
-                "name": "amounts_len",
-                "type": "felt"
-            },
-            {
-                "name": "amounts",
-                "type": "felt*"
-            },
-            {
-                "name": "uri_",
-                "type": "TokenUri"
             }
         ],
         "name": "constructor",
@@ -398,6 +382,33 @@
                 "type": "felt"
             }
         ],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "sender",
+                "type": "felt"
+            },
+            {
+                "name": "tokens_id_len",
+                "type": "felt"
+            },
+            {
+                "name": "tokens_id",
+                "type": "felt*"
+            },
+            {
+                "name": "amounts_len",
+                "type": "felt"
+            },
+            {
+                "name": "amounts",
+                "type": "felt*"
+            }
+        ],
+        "name": "initialize_nft_batch",
+        "outputs": [],
         "type": "function"
     }
 ]
