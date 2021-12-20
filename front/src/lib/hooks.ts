@@ -14,7 +14,8 @@ export function useStarknetCall(
 
   const callContract = React.useCallback(async () => {
     if (contract && method) {
-      contract.call(method, args).then((res) => setValue(res));
+      // console.log(args)
+      await contract.call(method, args).then((res) => setValue(res)).catch((err) => console.log(err));
     }
   }, [contract, method, args]);
 

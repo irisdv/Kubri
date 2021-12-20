@@ -98,8 +98,12 @@
         "name": "execute",
         "outputs": [
             {
-                "name": "response",
+                "name": "response_len",
                 "type": "felt"
+            },
+            {
+                "name": "response",
+                "type": "felt*"
             }
         ],
         "type": "function"

@@ -1,16 +1,16 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-describe("FakeErc721 contract", function() {
+describe("FakeErc721 contract", function () {
   // let FakeErc721, fakeErc721, owner, addr1, addr2;
-  let address721 : string;
-  let addressgateway : string;
-  let fakeErc721 : any;
-  let gateway : any;
+  let address721: string;
+  let addressgateway: string;
+  let fakeErc721: any;
+  let gateway: any;
 
   const L1_STARKNET_CORE = '0xde29d060D45901Fb19ED6C6e959EB22d8626708e';
-  const L2_ERC721_ADDRESS="0x0184b283baedf52cc72d46621d92b465087a208fa4ebff2178f5c8b2fb7765f4";
-  const L2_GATEWAY_ADDRESS="0x06fee411e29ff2ac941a40aa6b627b5e28ef12fd7df8d0b069db6a67fbe89583";
+  const L2_ERC721_ADDRESS = "0x0184b283baedf52cc72d46621d92b465087a208fa4ebff2178f5c8b2fb7765f4";
+  const L2_GATEWAY_ADDRESS = "0x05322180610e5fcdadb8bc90541c52d572337ee0b8631111d02a05f562a95304";
 
   beforeEach(async () => {
     const [deployer] = await ethers.getSigners();
@@ -39,9 +39,9 @@ describe("FakeErc721 contract", function() {
 
 
       // tester d'abord les différentes fonctions pour extract : 
-          // -- L1Tokencontract address de AssetType  
-          // -- extract tokenId du mintingBlob 
-          // -- get quantum from AssetType
+      // -- L1Tokencontract address de AssetType  
+      // -- extract tokenId du mintingBlob 
+      // -- get quantum from AssetType
 
       // await fakeErc721.mint(deployer.address, 1);
       // expect(await fakeErc721.balanceOf(deployer.address)).to.equal(1);
@@ -63,17 +63,17 @@ describe("FakeErc721 contract", function() {
 
 
 
-        // await fakeErc721.mint(addr1.address, 1);
-      // expect(await fakeErc721.balanceOf(addr1.address)).to.equal(1);
+    // await fakeErc721.mint(addr1.address, 1);
+    // expect(await fakeErc721.balanceOf(addr1.address)).to.equal(1);
 
   });
-    
+
   // describe('Send NFT minted to deployer addr to Gateway', () => {
 
-    // total supply
-    // regarder les approvals 
+  // total supply
+  // regarder les approvals 
 
-    // puis commment à voir les fonctions de gateway pour envoyer un message
+  // puis commment à voir les fonctions de gateway pour envoyer un message
   // });
 
 

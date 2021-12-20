@@ -8,7 +8,6 @@ import { ethers } from "hardhat";
 const L1_STARKNET_CORE = '0x5e6229F2D4d977d20A50219E521dE6Dd694d45cc';
 
 async function main() {
-  console.log("jedqghjfgsgqfgs");
   // Hardhat always runs the compile task when running scripts with its command
   // line interface.
   //
@@ -17,15 +16,15 @@ async function main() {
   // await hre.run('compile');
 
   // We get the contract to deploy
-  const FakeErc1155 = await ethers.getContractFactory("FakeErc1155");
-  const fakeErc1155 = await FakeErc1155.deploy();
-  await fakeErc1155.deployed();
-  console.log("FakeErc1155:", fakeErc1155.address);
+  const FakeErc721 = await ethers.getContractFactory("FakeErc721");
+  const fakeErc721 = await FakeErc721.deploy();
+  await fakeErc721.deployed();
+  console.log("FakeErc721:", fakeErc721.address);
 
-  const Gateway = await ethers.getContractFactory("Gateway1155");
+  const Gateway = await ethers.getContractFactory("Gateway");
   const gateway = await Gateway.deploy(L1_STARKNET_CORE);
   await gateway.deployed();
-  console.log("Gateway1155:", gateway.address);
+  console.log("Gateway:", gateway.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

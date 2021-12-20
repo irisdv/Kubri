@@ -2,10 +2,9 @@ import React from "react";
 import { Contract, Abi } from "starknet";
 import { useStarknet } from "../providers/StarknetProvider";
 
-import GATEWAY from "./abi/gateway.json";
+import GATEWAY from "./abi/gateway1155_abi.json";
 
-const GATEWAY_ADDRESS =
-  "0x06fee411e29ff2ac941a40aa6b627b5e28ef12fd7df8d0b069db6a67fbe89583";
+const GATEWAY_ADDRESS = "0x0170f8fbdd210cf0f0a79714762ec54ffb791d16e2da05a2e42bf941cee4b7e6";
 
 /**
  * Load the counter contract.

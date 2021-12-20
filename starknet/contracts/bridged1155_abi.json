@@ -39,31 +39,7 @@
                 "type": "felt"
             }
         ],
-        "name": "BlockchainReference",
-        "size": 1,
-        "type": "struct"
-    },
-    {
-        "members": [
-            {
-                "name": "a",
-                "offset": 0,
-                "type": "felt"
-            }
-        ],
-        "name": "BlockchainNamespace",
-        "size": 1,
-        "type": "struct"
-    },
-    {
-        "members": [
-            {
-                "name": "a",
-                "offset": 0,
-                "type": "felt"
-            }
-        ],
-        "name": "AssetReference",
+        "name": "TokenId",
         "size": 1,
         "type": "struct"
     },
@@ -87,7 +63,31 @@
                 "type": "felt"
             }
         ],
-        "name": "TokenId",
+        "name": "AssetReference",
+        "size": 1,
+        "type": "struct"
+    },
+    {
+        "members": [
+            {
+                "name": "a",
+                "offset": 0,
+                "type": "felt"
+            }
+        ],
+        "name": "BlockchainReference",
+        "size": 1,
+        "type": "struct"
+    },
+    {
+        "members": [
+            {
+                "name": "a",
+                "offset": 0,
+                "type": "felt"
+            }
+        ],
+        "name": "BlockchainNamespace",
         "size": 1,
         "type": "struct"
     },
@@ -310,6 +310,17 @@
             {
                 "name": "_from",
                 "type": "felt"
+            }
+        ],
+        "name": "safe_is_approved",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "_from",
+                "type": "felt"
             },
             {
                 "name": "token_id",
@@ -349,6 +360,44 @@
         ],
         "name": "_burn_batch",
         "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "owner",
+                "type": "felt"
+            },
+            {
+                "name": "tokens_id_len",
+                "type": "felt"
+            },
+            {
+                "name": "tokens_id",
+                "type": "felt*"
+            },
+            {
+                "name": "amounts_len",
+                "type": "felt"
+            },
+            {
+                "name": "amounts",
+                "type": "felt*"
+            }
+        ],
+        "name": "delete_token_batch",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_l1_address",
+        "outputs": [
+            {
+                "name": "address",
+                "type": "felt"
+            }
+        ],
         "type": "function"
     }
 ]

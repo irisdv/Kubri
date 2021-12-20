@@ -49,20 +49,10 @@
                 "name": "a",
                 "offset": 0,
                 "type": "felt"
-            },
-            {
-                "name": "b",
-                "offset": 1,
-                "type": "felt"
-            },
-            {
-                "name": "c",
-                "offset": 2,
-                "type": "felt"
             }
         ],
-        "name": "TokenId",
-        "size": 3,
+        "name": "AssetReference",
+        "size": 1,
         "type": "struct"
     },
     {
@@ -95,10 +85,20 @@
                 "name": "a",
                 "offset": 0,
                 "type": "felt"
+            },
+            {
+                "name": "b",
+                "offset": 1,
+                "type": "felt"
+            },
+            {
+                "name": "c",
+                "offset": 2,
+                "type": "felt"
             }
         ],
-        "name": "AssetReference",
-        "size": 1,
+        "name": "TokenId",
+        "size": 3,
         "type": "struct"
     },
     {
