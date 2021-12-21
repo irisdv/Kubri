@@ -68,16 +68,15 @@ end
 
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        recipient : felt, tokens_id_len : felt, tokens_id : felt*, amounts_len : felt,
-        amounts : felt*, uri_ : TokenUri):
+        recipient : felt, address_l1 : felt):
     # get_caller_address() returns '0' in the constructor;
     # therefore, recipient parameter is included
     gateway_address.write(recipient)
-
-    _mint_batch(recipient, tokens_id_len, tokens_id, amounts_len, amounts)
+    l1_address.write(address_l1)
+    # _mint_batch(recipient, tokens_id_len, tokens_id, amounts_len, amounts)
 
     # Set uri
-    _set_uri(uri_)
+    # _set_uri(uri_)
 
     return ()
 end
@@ -368,4 +367,18 @@ func get_l1_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
         address : felt):
     let (address) = l1_address.read()
     return (address)
+end
+
+@external
+func initialize_nft_batch{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
+        sender : felt, tokens_id_len : felt, tokens_id : felt*, amounts_len : felt,
+        amounts : felt*):
+    let (_initialized) = initialized.read()
+    assert _initialized = 0
+    initialized.write(1)
+    # let (sender) = get_caller_address()
+    _mint_batch(sender, tokens_id_len, tokens_id, amounts_len, amounts)
+    # Set uri
+    # _set_uri(uri_)
+    return ()
 end

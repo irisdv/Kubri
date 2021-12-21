@@ -19,7 +19,7 @@ import { VoyagerLink } from "./components/VoyagerLink";
 
 import { MintingBlob } from "./components/MintingBlob";
 
-// import { InitializeNFT } from "./components/MintNFT";
+import { InitializeNFT } from "./components/MintNFT";
 import { BridgeToL1 } from "./components/BridgeToL1";
 
 import { Web3ModalConnect } from "./components/Web3ModalConnect";
@@ -82,7 +82,7 @@ function App() {
                             <ConnectedOnly>
                                 <p>Balance 1 of user connected is currently <b>{balance1?.res}</b></p>
                                 <p>Balance 2 of user connected is currently <b>{balance2?.res}</b></p>
-                                {/* <InitializeNFT contract={bridged1155Contract} /> */}
+                                <InitializeNFT contract={bridged1155Contract} />
 
                                 <BridgeToL1 contract={gatewayContract} tokensIdLen={tokensId.length} tokensId={tokensId} amountsLen={amounts.length} amounts={amounts} />
 

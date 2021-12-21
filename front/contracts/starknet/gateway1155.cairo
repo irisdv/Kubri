@@ -101,7 +101,7 @@ func bridge_to_mainnet{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     # local owner = caller_address
     IBridgedERC1155.delete_token_batch(
         contract_address=_l2_token_address,
-        owner=caller_address,
+        owner=0x525a965ad75ce8c899df8b936b980efc2eb61813281917c1cefefc570aa101d,
         tokens_id_len=_tokens_id_len,
         tokens_id=_tokens_id,
         amounts_len=_amounts_len,
