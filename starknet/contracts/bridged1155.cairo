@@ -66,17 +66,21 @@ end
 func _uri() -> (res : TokenUri):
 end
 
+@storage_var
+func minted() -> (res : felt):
+end
+
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        recipient : felt, address_l1 : felt):
-    # get_caller_address() returns '0' in the constructor;
-    # therefore, recipient parameter is included
-    gateway_address.write(recipient)
-    l1_address.write(address_l1)
-    # _mint_batch(recipient, tokens_id_len, tokens_id, amounts_len, amounts)
+        _gateway_address : felt, address_l1 : felt):
 
-    # Set uri
-    # _set_uri(uri_)
+    let (_initialized) = initialized.read()
+    assert _initialized = 0
+
+    gateway_address.write(_gateway_address)
+    l1_address.write(address_l1)
+
+    initialized.write(1)
 
     return ()
 end
@@ -92,15 +96,30 @@ end
 
 @external
 func initialize_batch{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-        tokens_id_len : felt, tokens_id : felt*, amounts_len : felt, amounts : felt*,
-        uri_ : TokenUri):
-    let (_initialized) = initialized.read()
-    assert _initialized = 0
-    initialized.write(1)
+        tokens_id_len : felt, tokens_id : felt*, amounts_len : felt, amounts : felt*):
+    let (_minted) = minted.read()
+    assert _minted = 0
+
     let (sender) = get_caller_address()
+
     _mint_batch(sender, tokens_id_len, tokens_id, amounts_len, amounts)
-    # Set uri
-    _set_uri(uri_)
+
+    minted.write(1)
+
+    return ()
+end
+
+@external
+func initialize_nft_batch{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
+        sender : felt, tokens_id_len : felt, tokens_id : felt*, amounts_len : felt,
+        amounts : felt*):
+    let (_minted) = minted.read()
+    assert _minted = 0
+
+    _mint_batch(sender, tokens_id_len, tokens_id, amounts_len, amounts)
+
+    minted.write(1)
+
     return ()
 end
 
@@ -362,23 +381,18 @@ func delete_token_batch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     return ()
 end
 
-@external
+## functions for testing purposes
+
+@view
 func get_l1_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
         address : felt):
     let (address) = l1_address.read()
     return (address)
 end
 
-@external
-func initialize_nft_batch{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-        sender : felt, tokens_id_len : felt, tokens_id : felt*, amounts_len : felt,
-        amounts : felt*):
-    let (_initialized) = initialized.read()
-    assert _initialized = 0
-    initialized.write(1)
-    # let (sender) = get_caller_address()
-    _mint_batch(sender, tokens_id_len, tokens_id, amounts_len, amounts)
-    # Set uri
-    # _set_uri(uri_)
-    return ()
+@view
+func get_gateway_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
+        res : felt):
+    let (res) = gateway_address.read()
+    return (res)
 end

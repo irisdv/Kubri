@@ -18,9 +18,6 @@ namespace IBridgedERC1155:
             owner : felt, tokens_id_len : felt, tokens_id : felt*, amounts_len : felt,
             amounts : felt*):
     end
-
-    # func get_l1_address() -> (address : felt):
-    # end
 end
 
 # construction guard
@@ -32,11 +29,6 @@ end
 @storage_var
 func l1_gateway() -> (res : felt):
 end
-
-# keep track of the minted ERC1155
-# @storage_var
-# func custody(l1_token_address : felt, token_id : felt) -> (res : felt):
-# end
 
 # keep track of the minted L2 ERC1155 bridged to L1
 @storage_var
@@ -70,21 +62,16 @@ func bridge_to_mainnet{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
 
     # check owner of the ERC1155 to bridge is the caller
     IBridgedERC1155.safe_is_approved(contract_address=_l2_token_address, _from=caller_address)
-    # let (owner) = IBridgedERC1155.owner_of(
-    #     contract_address=_l2_token_address, tokens_id_len=_token_id_len, tokens_id=_tokens_id, amounts_len=_amounts_len, amounts=_amounts )
-    # assert caller_address = owner
 
     # check this NFT has not been bridged // is not in custody
-
     let (current_custody_l2) = read_custody_l2(
         l2_token_address=_l2_token_address,
         tokens_id_len=_tokens_id_len,
         tokens_id=_tokens_id,
         amounts_len=_amounts_len,
         amounts=_amounts)
-    # custody_l2.read(
-    #     l2_token_address=_l2_token_address, token_id=_token_id, amount=a)
     assert current_custody_l2 = 0
+
     # add NFT into custody
     write_custody_l2(
         l2_token_address=_l2_token_address,
@@ -93,12 +80,9 @@ func bridge_to_mainnet{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
         tokens_id=_tokens_id,
         amounts_len=_amounts_len,
         amounts=_amounts)
-    # custody_l2.write(
-    #     l2_token_address=_l2_token_address, token_id=_token_id, value=_l1_token_address)
 
     let (l1_gateway_address) = l1_gateway.read()
-    # alloc_locals
-    # local owner = caller_address
+
     IBridgedERC1155.delete_token_batch(
         contract_address=_l2_token_address,
         owner=caller_address,
@@ -113,23 +97,25 @@ func bridge_to_mainnet{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     assert message_payload[2] = _l1_token_address
     assert message_payload[3] = _l2_token_address
     assert message_payload[4] = _tokens_id_len
-    message_payload[5] = _tokens_id
-    assert message_payload[6] = _amounts_len
-    message_payload[7] = _amounts
+    # message_payload[5] = _tokens_id
+    assert message_payload[5] = _amounts_len
+    # message_payload[7] = _amounts
 
-    send_message_to_l1(to_address=l1_gateway_address, payload_size=8, payload=message_payload)
+    send_message_to_l1(to_address=l1_gateway_address, payload_size=6, payload=message_payload)
 
-    write_custody_l2(
-        l2_token_address=_l2_token_address,
-        l1_token_address=0,
-        tokens_id_len=_tokens_id_len,
-        tokens_id=_tokens_id,
-        amounts_len=_amounts_len,
-        amounts=_amounts)
+    # write_custody_l2(
+    #     l2_token_address=_l2_token_address,
+    #     l1_token_address=0,
+    #     tokens_id_len=_tokens_id_len,
+    #     tokens_id=_tokens_id,
+    #     amounts_len=_amounts_len,
+    #     amounts=_amounts)
 
     return ()
 end
 
+# passed function in view for testing purposes 
+@view
 func read_custody_l2{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         l2_token_address : felt, tokens_id_len : felt, tokens_id : felt*, amounts_len : felt,
         amounts : felt*) -> (res : felt):
@@ -137,6 +123,7 @@ func read_custody_l2{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     if tokens_id_len == 0:
         return (0)
     end
+
     let (current_custody_l2) = custody_l2.read(l2_token_address, [tokens_id], [amounts])
 
     assert current_custody_l2 = 0
@@ -156,7 +143,6 @@ func write_custody_l2{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     if tokens_id_len == 0:
         return ()
     end
-
     custody_l2.write(l2_token_address, [tokens_id], [amounts], value=l1_token_address)
 
     return write_custody_l2(
@@ -167,42 +153,6 @@ func write_custody_l2{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
         amounts_len=amounts_len - 1,
         amounts=amounts + 1)
 end
-
-# func clear_custody_l2{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-#         l2_token_address : felt, l1_token_address : felt, tokens_id_len : felt, tokens_id : felt*):
-#     if tokens_id_len == 0:
-#         return ()
-#     end
-
-# custody_l2.write(l2_token_address, [tokens_id], [amounts], value=0)
-
-# return clear_custody_l2(
-#         l2_token_address=l2_token_address,
-#         tokens_id_len=tokens_id_len - 1,
-#         tokens_id=tokens_id + 1)
-# end
-
-# bridge back native L2 NFT to Starknet
-# Receive and handle deposit message
-# @l1_handler
-# func bridge_from_mainnet{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-#         from_address : felt, _owner : felt, _l1_token_address : felt, _l2_token_address : felt,
-#         _token_id : felt):
-#     let (res) = l1_gateway.read()
-#     assert from_address = res
-
-# let (current_custody_l2) = custody_l2.read(
-#         l2_token_address=_l2_token_address, token_id=_token_id)
-#     assert current_custody_l2 = 0
-
-# mint_credits.write(
-#         l1_token_address=_l1_token_address,
-#         token_id=_token_id,
-#         owner=_owner,
-#         value=_l2_token_address)
-
-# return ()
-# end
 
 @view
 func get_mint_credit{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
@@ -242,9 +192,9 @@ func get_l1_gateway{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     return (res)
 end
 
-# @view
-# func get_custody_l2{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-#         _l2_token_address : felt, _token_id : felt) -> (current_custody : felt):
-#     let (current_custody) = custody_l2.read(l2_token_address=_l2_token_address, token_id=_token_id)
-#     return (current_custody)
-# end
+@view
+func get_custody_l2{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        _l2_token_address : felt, _token_id : felt, _amount : felt) -> (current_custody : felt):
+    let (current_custody) = custody_l2.read(l2_token_address=_l2_token_address, token_id=_token_id, amount=_amount)
+    return (current_custody)
+end
