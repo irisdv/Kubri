@@ -35,6 +35,11 @@ async def test_erc1155_factory():
     tokens_id = [1, 2]
     amounts = [2, 3]
     starknet = await Starknet.empty()
+
+    auth_user = await starknet.deploy(source=ACCOUNT_FILE, 
+        constructor_calldata=[
+            1903647282632399027225629500434100617446916994367413898913170243228889244137
+        ],)
     # account = await starknet.deploy(
     #     ACCOUNT_FILE,
     #     constructor_calldata=[signer.public_key]
@@ -71,12 +76,17 @@ async def test_erc1155_factory():
             #int.from_bytes("eip155".encode("ascii"), 'big'), 1, int.from_bytes("erc1155".encode("ascii"), 'big'), 0x056bfe4139dd88d0a9ff44e3166cb781e002f052b4884e6f56e51b11bebee599 , int.from_bytes("{id}".encode("ascii"), 'big')
         ]
     )
-    print(erc1155)
-    await erc1155.initialize_nft_batch(0x525a965ad75ce8c899df8b936b980efc2eb61813281917c1cefefc570aa101d, tokens_id, amounts ).invoke()
-    assert (await erc1155.balance_of(0x525a965ad75ce8c899df8b936b980efc2eb61813281917c1cefefc570aa101d, 1).call()).result == (2,)
-    assert (await erc1155.balance_of(0x525a965ad75ce8c899df8b936b980efc2eb61813281917c1cefefc570aa101d, 2).call()).result == (3,)
+    print(erc1155.contract_address)
+    await erc1155.initialize_nft_batch(auth_user.contract_address, tokens_id, amounts ).invoke()
+    assert (await erc1155.balance_of(auth_user.contract_address, 1).call()).result == (2,)
+    assert (await erc1155.balance_of(auth_user.contract_address, 2).call()).result == (3,)
 
-    
+    await erc1155.set_approval_for_all(gateway1155.contract_address, 1).invoke(auth_user.contract_address)
+
+    await erc1155.delete_token_batch(auth_user.contract_address, tokens_id, amounts ).invoke(gateway1155.contract_address)
+
+    # await gateway1155.bridge_to_mainnet(0x9aCb0D74c8DbF3aa12f048882D602f813d615F6f, erc1155.contract_address,  tokens_id, amounts, 0x786e4fE7FE713F6988f30C2BE27115a9288d3Be5).invoke()
+
     return starknet, erc1155
 
 
