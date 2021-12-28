@@ -21,6 +21,7 @@ import { MintingBlob } from "./components/MintingBlob";
 
 import { InitializeNFT } from "./components/MintNFT";
 import { BridgeToL1 } from "./components/BridgeToL1";
+import { SetApproval } from "./components/SetApproval";
 
 import { Web3ModalConnect } from "./components/Web3ModalConnect";
 import { WithdrawAndMint } from "./components/WithdrawAndMint";
@@ -41,6 +42,9 @@ function App() {
     const balance2 = useStarknetCall(bridged1155Contract, "balance_of", { account, tokensId2 });
     const [amounts, setAmounts] = React.useState([balance1, balance2]);
     const { transactions } = useTransactions();
+
+    const gatewayContractAddress = gatewayContract?.connectedTo;
+    const isApproval = useStarknetCall(bridged1155Contract, "is_approved_for_all", { account, gatewayContractAddress });
 
     return (
         <div className="container">
@@ -83,7 +87,8 @@ function App() {
                                 <p>Balance 1 of user connected is currently <b>{balance1?.res}</b></p>
                                 <p>Balance 2 of user connected is currently <b>{balance2?.res}</b></p>
                                 <InitializeNFT contract={bridged1155Contract} />
-
+                                <SetApproval contract={bridged1155Contract} />
+                                <p>Connected user's Approval <b>{isApproval?.res}</b></p>
                                 <BridgeToL1 contract={gatewayContract} tokensIdLen={tokensId.length} tokensId={tokensId} amountsLen={amounts.length} amounts={amounts} />
 
                             </ConnectedOnly>
