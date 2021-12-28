@@ -76,38 +76,50 @@ contract Gateway1155 {
     // }
 
     // Bridging back from Starknet
-    // function bridgeFromStarknet(
-    //     IERC1155 _l1TokenContract,
-    //     uint256 _l2TokenContract,
-    //     uint256 _tokensIdLen,
-    //     uint256[] _tokensId,
-    //     uint256 _amountsLen,
-    //     uint256[] _amounts
-    // ) external {
-    //     uint256[] memory payload = new uint256[](8);
+    function bridgeFromStarknet(
+        IERC1155 _l1TokenContract,
+        uint256 _l2TokenContract,
+        uint256[] memory _tokensId,
+        uint256[] memory _amounts
+    ) external {
+        require(
+            _tokensId.length == _amounts.length,
+            "The Size of array tokenID and array amounts should be the same"
+        );
 
-    //     // build withdraw message payload
-    //     payload[0] = BRIDGE_MODE_WITHDRAW;
-    //     payload[1] = addressToUint(msg.sender);
-    //     payload[2] = addressToUint(address(_l1TokenContract));
-    //     payload[3] = _l2TokenContract;
-    //     payload[4] = _tokensIdLen;
-    //     payload[5] = _tokensId;
-    //     payload[6] = _amountsLen;
-    //     payload[7] = _amounts;
+        uint256 size = 4 + (_tokensId.length * 2);
+        uint256 index = 0;
+        uint256[] memory payload = new uint256[](size);
 
-    //     // consum withdraw message
-    //     starknetCore.consumeMessageFromL2(endpointGateway, payload);
+        // build withdraw message payload
+        payload[0] = BRIDGE_MODE_WITHDRAW;
+        payload[1] = addressToUint(msg.sender);
+        payload[2] = addressToUint(address(_l1TokenContract));
+        payload[3] = _l2TokenContract;
 
-    //     // optimistic transfer, should revert if gateway is not token owner
-    //     _l1TokenContract.safeBatchTransferFrom(
-    //         address(this),
-    //         msg.sender,
-    //         _tokensId,
-    //         _amounts
-    //     );
-    //     // _l1TokenContract.satransferFrom(address(this), msg.sender, _tokenId);
-    // }
+        for (uint256 i = 4; i < size; i++) {
+            require(
+                index < _tokensId.length,
+                "You can not access to that element"
+            );
+            payload[i] = _tokensId[index];
+            i++;
+            payload[i] = _amounts[index];
+            index++;
+        }
+
+        // consum withdraw message
+        starknetCore.consumeMessageFromL2(endpointGateway, payload);
+
+        // optimistic transfer, should revert if gateway is not token owner
+        // _l1TokenContract.safeBatchTransferFrom(
+        //     address(this),
+        //     msg.sender,
+        //     _tokensId,
+        //     _amounts
+        // );
+        // _l1TokenContract.satransferFrom(address(this), msg.sender, _tokenId);
+    }
 
     // Bridging native token from Starknet
     // function withdrawAndMint(
@@ -147,60 +159,60 @@ contract Gateway1155 {
     //     // mintingBlob
     // }
 
-    //     function calculateMintableAssetId(
-    //         uint256 assetType,
-    //         bytes memory mintingBlob
-    //     ) internal pure returns (uint256 assetId) {
-    //         uint256 blobHash = uint256(keccak256(mintingBlob));
-    //         assetId =
-    //             (uint256(
-    //                 keccak256(
-    //                     abi.encodePacked(MINTABLE_PREFIX, assetType, blobHash)
-    //                 )
-    //             ) & MASK_240) |
-    //             MINTABLE_ASSET_ID_FLAG;
-    //     }
-
-    //     function getAssetInfo(uint256 assetType)
-    //         public
-    //         view
-    //         returns (bytes memory assetInfo)
-    //     {
-    //         // Verify that the registration is set and valid.
-    //         require(registeredAssetType[assetType], "ASSET_TYPE_NOT_REGISTERED");
-
-    //         // Retrieve registration.
-    //         assetInfo = assetTypeToAssetInfo[assetType];
-    //     }
-
-    //     // function isEther(uint256 assetType) internal view returns (bool) {
-    //     //     return extractTokenSelector(getAssetInfo(assetType)) == ETH_SELECTOR;
-    //     // }
-
-    //     function isMintableAssetType(uint256 assetType)
-    //         internal
-    //         view
-    //         returns (bool)
-    //     {
-    //         bytes4 tokenSelector = extractTokenSelector(getAssetInfo(assetType));
-    //         return
-    //             tokenSelector == MINTABLE_ERC20_SELECTOR ||
-    //             tokenSelector == MINTABLE_ERC721_SELECTOR;
-    //     }
-
-    //     function extractTokenSelector(bytes memory assetInfo)
-    //         internal
-    //         pure
-    //         returns (bytes4 selector)
-    //     {
-    //         // solium-disable-next-line security/no-inline-assembly
-    //         assembly {
-    //             selector := and(
-    //                 0xffffffff00000000000000000000000000000000000000000000000000000000,
-    //                 mload(add(assetInfo, SELECTOR_OFFSET))
+    // function calculateMintableAssetId(
+    //     uint256 assetType,
+    //     bytes memory mintingBlob
+    // ) internal pure returns (uint256 assetId) {
+    //     uint256 blobHash = uint256(keccak256(mintingBlob));
+    //     assetId =
+    //         (uint256(
+    //             keccak256(
+    //                 abi.encodePacked(MINTABLE_PREFIX, assetType, blobHash)
     //             )
-    //         }
+    //         ) & MASK_240) |
+    //         MINTABLE_ASSET_ID_FLAG;
+    // }
+
+    // function getAssetInfo(uint256 assetType)
+    //     public
+    //     view
+    //     returns (bytes memory assetInfo)
+    // {
+    //     // Verify that the registration is set and valid.
+    //     require(registeredAssetType[assetType], "ASSET_TYPE_NOT_REGISTERED");
+
+    //     // Retrieve registration.
+    //     assetInfo = assetTypeToAssetInfo[assetType];
+    // }
+
+    // function isEther(uint256 assetType) internal view returns (bool) {
+    //     return extractTokenSelector(getAssetInfo(assetType)) == ETH_SELECTOR;
+    // }
+
+    // function isMintableAssetType(uint256 assetType)
+    //     internal
+    //     view
+    //     returns (bool)
+    // {
+    //     bytes4 tokenSelector = extractTokenSelector(getAssetInfo(assetType));
+    //     return
+    //         tokenSelector == MINTABLE_ERC20_SELECTOR ||
+    //         tokenSelector == MINTABLE_ERC721_SELECTOR;
+    // }
+
+    // function extractTokenSelector(bytes memory assetInfo)
+    //     internal
+    //     pure
+    //     returns (bytes4 selector)
+    // {
+    //     // solium-disable-next-line security/no-inline-assembly
+    //     assembly {
+    //         selector := and(
+    //             0xffffffff00000000000000000000000000000000000000000000000000000000,
+    //             mload(add(assetInfo, SELECTOR_OFFSET))
+    //         )
     //     }
+    // }
 }
 
 /*

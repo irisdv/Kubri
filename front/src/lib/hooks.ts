@@ -14,7 +14,8 @@ export function useStarknetCall(
 
   const callContract = React.useCallback(async () => {
     if (contract && method) {
-      // console.log(args)
+      // console.log(method);
+      // console.log(args);
       await contract.call(method, args).then((res) => setValue(res)).catch((err) => console.log(err));
     }
   }, [contract, method, args]);
@@ -45,17 +46,25 @@ export function useStarknetInvoke(
   const [submitting, setSubmitting] = React.useState<boolean>(false);
 
   React.useEffect(() => {
+    console.log(account)
+    console.log(contract)
+    console.log(method)
     if (account && contract && method) {
       const invokeFunc = (args?: any) => {
         setSubmitting(true);
         try {
           contract.invoke(method, args).then((transaction) => {
+            console.log(method)
+            console.log(args);
+            console.log(transaction)
             const { transaction_hash } = transaction;
             setHash(transaction_hash);
             setSubmitting(false);
             addTransaction(transaction);
           });
         } catch (err) {
+          console.log("-------_ERRR--------")
+          console.log(err)
           setSubmitting(false);
           setHash(undefined);
         }

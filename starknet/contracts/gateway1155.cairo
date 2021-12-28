@@ -56,7 +56,8 @@ end
 @external
 func bridge_to_mainnet{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         _l1_token_address : felt, _l2_token_address : felt, _tokens_id_len : felt,
-        _tokens_id : felt*, _amounts_len : felt, _amounts : felt*, _l1_owner : felt):
+        _tokens_id : felt*, _amounts_len : felt, _amounts : felt*, _l1_owner : felt) -> (
+        res_len : felt, res : felt*):
     alloc_locals
     let (local caller_address : felt) = get_caller_address()
 
@@ -91,17 +92,29 @@ func bridge_to_mainnet{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
         amounts_len=_amounts_len,
         amounts=_amounts)
 
+    let payload_size = (4 + (_tokens_id_len * 2))
     let (message_payload : felt*) = alloc()
     assert message_payload[0] = BRIDGE_MODE_WITHDRAW
     assert message_payload[1] = _l1_owner
     assert message_payload[2] = _l1_token_address
     assert message_payload[3] = _l2_token_address
-    assert message_payload[4] = _tokens_id_len
+
+    fill_payload(
+        message_payload_len=payload_size,
+        message_payload=message_payload,
+        tokens_id_len=_tokens_id_len,
+        tokens_id=_tokens_id,
+        amounts_len=_amounts_len,
+        amounts=_amounts,
+        index=4)
+
+    # assert message_payload[4] = _tokens_id_len
     # message_payload[5] = _tokens_id
-    assert message_payload[5] = _amounts_len
+    # assert message_payload[5] = _amounts_len
     # message_payload[7] = _amounts
 
-    send_message_to_l1(to_address=l1_gateway_address, payload_size=6, payload=message_payload)
+    send_message_to_l1(
+        to_address=l1_gateway_address, payload_size=payload_size, payload=message_payload)
 
     # write_custody_l2(
     #     l2_token_address=_l2_token_address,
@@ -111,10 +124,30 @@ func bridge_to_mainnet{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     #     amounts_len=_amounts_len,
     #     amounts=_amounts)
 
-    return ()
+    return (payload_size, message_payload)
 end
 
-# passed function in view for testing purposes 
+@view
+func fill_payload{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        message_payload_len : felt, message_payload : felt*, tokens_id_len : felt,
+        tokens_id : felt*, amounts_len : felt, amounts : felt*, index : felt):
+    assert tokens_id_len = amounts_len
+    if tokens_id_len == 0:
+        return ()
+    end
+    assert message_payload[index] = [tokens_id]
+    assert message_payload[index + 1] = [amounts]
+
+    return fill_payload(
+        message_payload_len=message_payload_len,
+        message_payload=message_payload,
+        tokens_id_len=tokens_id_len - 1,
+        tokens_id=tokens_id + 1,
+        amounts_len=amounts_len - 1,
+        amounts=amounts + 1,
+        index=index + 2)
+end
+# passed function in view for testing purposes
 @view
 func read_custody_l2{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         l2_token_address : felt, tokens_id_len : felt, tokens_id : felt*, amounts_len : felt,
@@ -195,6 +228,7 @@ end
 @view
 func get_custody_l2{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         _l2_token_address : felt, _token_id : felt, _amount : felt) -> (current_custody : felt):
-    let (current_custody) = custody_l2.read(l2_token_address=_l2_token_address, token_id=_token_id, amount=_amount)
+    let (current_custody) = custody_l2.read(
+        l2_token_address=_l2_token_address, token_id=_token_id, amount=_amount)
     return (current_custody)
 end

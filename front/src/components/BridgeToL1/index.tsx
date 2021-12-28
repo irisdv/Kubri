@@ -18,11 +18,7 @@ export function BridgeToL1({ contract, tokensIdLen, tokensId, amountsLen, amount
         hash,
         submitting
     } = useStarknetInvoke(contract, "bridge_to_mainnet");
-    // const {
-    //     invoke: set_approval_for_all,
-    //     hash,
-    //     submitting
-    // } = useStarknetInvoke(contract2, "set_approval_for_all");
+
     const transactionStatus = useTransaction(hash);
     console.log(hash)
     if (!account) return null;
@@ -30,11 +26,6 @@ export function BridgeToL1({ contract, tokensIdLen, tokensId, amountsLen, amount
 
     return (
         <Row style={{ padding: '10px', justifyContent: 'center' }}>
-            {/* <Button
-                type="primary"
-                onClick={() => set_approval_for_all && set_approval_for_all({})}
-                style={{ backgroundColor: '#002766', borderColor: '#002766' }}
-            >Bridge NFT to L1</Button> */}
             <Button
                 type="primary"
                 onClick={() => bridge_to_mainnet && bridge_to_mainnet({ l1TokenAddress, l2TokenAddress, tokensIdLen, tokensId, amountsLen, amounts, l1Owner })}

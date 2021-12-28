@@ -4,7 +4,7 @@ import { useStarknet } from "../providers/StarknetProvider";
 
 import BRIDGED1155 from "./abi/bridged1155_abi.json";
 
-const ERC1155_ADDRESS = "0x016fc6ee59ccb6808e9184de5b72a2f66790498c75a70bae560e2764af181a9e";
+const ERC1155_ADDRESS = "0x01ad6d3f669248d8036f5799d000e13baf6b0dbf1e78c9c091b6862a9e90c852";
 //   "0x0184b283baedf52cc72d46621d92b465087a208fa4ebff2178f5c8b2fb7765f4";
 
 /**

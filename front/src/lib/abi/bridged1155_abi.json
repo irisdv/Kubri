@@ -39,7 +39,19 @@
                 "type": "felt"
             }
         ],
-        "name": "AssetNamespace",
+        "name": "BlockchainReference",
+        "size": 1,
+        "type": "struct"
+    },
+    {
+        "members": [
+            {
+                "name": "a",
+                "offset": 0,
+                "type": "felt"
+            }
+        ],
+        "name": "TokenId",
         "size": 1,
         "type": "struct"
     },
@@ -63,38 +75,26 @@
                 "type": "felt"
             }
         ],
+        "name": "AssetNamespace",
+        "size": 1,
+        "type": "struct"
+    },
+    {
+        "members": [
+            {
+                "name": "a",
+                "offset": 0,
+                "type": "felt"
+            }
+        ],
         "name": "BlockchainNamespace",
-        "size": 1,
-        "type": "struct"
-    },
-    {
-        "members": [
-            {
-                "name": "a",
-                "offset": 0,
-                "type": "felt"
-            }
-        ],
-        "name": "BlockchainReference",
-        "size": 1,
-        "type": "struct"
-    },
-    {
-        "members": [
-            {
-                "name": "a",
-                "offset": 0,
-                "type": "felt"
-            }
-        ],
-        "name": "TokenId",
         "size": 1,
         "type": "struct"
     },
     {
         "inputs": [
             {
-                "name": "recipient",
+                "name": "_gateway_address",
                 "type": "felt"
             },
             {
@@ -123,13 +123,36 @@
             {
                 "name": "amounts",
                 "type": "felt*"
-            },
-            {
-                "name": "uri_",
-                "type": "TokenUri"
             }
         ],
         "name": "initialize_batch",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "sender",
+                "type": "felt"
+            },
+            {
+                "name": "tokens_id_len",
+                "type": "felt"
+            },
+            {
+                "name": "tokens_id",
+                "type": "felt*"
+            },
+            {
+                "name": "amounts_len",
+                "type": "felt"
+            },
+            {
+                "name": "amounts",
+                "type": "felt*"
+            }
+        ],
+        "name": "initialize_nft_batch",
         "outputs": [],
         "type": "function"
     },
@@ -382,33 +405,19 @@
                 "type": "felt"
             }
         ],
+        "stateMutability": "view",
         "type": "function"
     },
     {
-        "inputs": [
+        "inputs": [],
+        "name": "get_gateway_address",
+        "outputs": [
             {
-                "name": "sender",
+                "name": "res",
                 "type": "felt"
-            },
-            {
-                "name": "tokens_id_len",
-                "type": "felt"
-            },
-            {
-                "name": "tokens_id",
-                "type": "felt*"
-            },
-            {
-                "name": "amounts_len",
-                "type": "felt"
-            },
-            {
-                "name": "amounts",
-                "type": "felt*"
             }
         ],
-        "name": "initialize_nft_batch",
-        "outputs": [],
+        "stateMutability": "view",
         "type": "function"
     }
 ]

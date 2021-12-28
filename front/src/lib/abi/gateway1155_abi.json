@@ -42,7 +42,85 @@
             }
         ],
         "name": "bridge_to_mainnet",
+        "outputs": [
+            {
+                "name": "res_len",
+                "type": "felt"
+            },
+            {
+                "name": "res",
+                "type": "felt*"
+            }
+        ],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "message_payload_len",
+                "type": "felt"
+            },
+            {
+                "name": "message_payload",
+                "type": "felt*"
+            },
+            {
+                "name": "tokens_id_len",
+                "type": "felt"
+            },
+            {
+                "name": "tokens_id",
+                "type": "felt*"
+            },
+            {
+                "name": "amounts_len",
+                "type": "felt"
+            },
+            {
+                "name": "amounts",
+                "type": "felt*"
+            },
+            {
+                "name": "index",
+                "type": "felt"
+            }
+        ],
+        "name": "fill_payload",
         "outputs": [],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "l2_token_address",
+                "type": "felt"
+            },
+            {
+                "name": "tokens_id_len",
+                "type": "felt"
+            },
+            {
+                "name": "tokens_id",
+                "type": "felt*"
+            },
+            {
+                "name": "amounts_len",
+                "type": "felt"
+            },
+            {
+                "name": "amounts",
+                "type": "felt*"
+            }
+        ],
+        "name": "read_custody_l2",
+        "outputs": [
+            {
+                "name": "res",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
         "type": "function"
     },
     {
@@ -76,6 +154,31 @@
         "outputs": [
             {
                 "name": "res",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "_l2_token_address",
+                "type": "felt"
+            },
+            {
+                "name": "_token_id",
+                "type": "felt"
+            },
+            {
+                "name": "_amount",
+                "type": "felt"
+            }
+        ],
+        "name": "get_custody_l2",
+        "outputs": [
+            {
+                "name": "current_custody",
                 "type": "felt"
             }
         ],

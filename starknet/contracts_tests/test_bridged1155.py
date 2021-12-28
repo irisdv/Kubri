@@ -100,8 +100,9 @@ async def test_bridge_to_l1(
 
     assert (await l2_bridge.read_custody_l2(l2_erc1155.contract_address, [1,2], [50, 100]).call()).result == (0,)
     # test bridge to mainnet function 
-    await l2_bridge.bridge_to_mainnet(L1_TOKEN_ADDRESS,l2_erc1155.contract_address, [1,2], [50,100], L1_OWNER).invoke(auth_user.contract_address)
+    payload, ib = await l2_bridge.bridge_to_mainnet(L1_TOKEN_ADDRESS,l2_erc1155.contract_address, [1,2], [50,100], L1_OWNER).invoke(auth_user.contract_address)
     
+    print(ib)
     # check NFTs bridged are in custody in storage_var
     assert (await l2_bridge.get_custody_l2(l2_erc1155.contract_address, 1, 50).call()).result == (L1_TOKEN_ADDRESS,)
     assert (await l2_bridge.get_custody_l2(l2_erc1155.contract_address, 2, 100).call()).result == (L1_TOKEN_ADDRESS,)
