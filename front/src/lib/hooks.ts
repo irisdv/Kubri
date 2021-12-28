@@ -14,14 +14,17 @@ export function useStarknetCall(
 
   const callContract = React.useCallback(async () => {
     if (contract && method) {
-      // console.log(args)
-      await contract.call(method, args).then((res) => setValue(res)).catch((err) => console.log(err));
+      // console.log('method', method);
+      // console.log('contract', contract);
+      // console.log('args', args);
+      // await contract.call(method, args).then((res) => setValue(res)).catch((err) => console.log(err));
+      contract.call(method, args).then((res) => setValue(res));
     }
   }, [contract, method, args]);
 
   React.useEffect(() => {
     callContract();
-  }, [callContract, blockNumber]);
+  }, [blockNumber]);
 
   return value;
 }
@@ -56,6 +59,8 @@ export function useStarknetInvoke(
             addTransaction(transaction);
           });
         } catch (err) {
+          // console.log("-------_ERRR--------")
+          // console.log(err)
           setSubmitting(false);
           setHash(undefined);
         }
