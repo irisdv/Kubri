@@ -43,37 +43,54 @@ contract Gateway1155 {
     }
 
     // Bridging to Starknet
-    // function bridgeToStarknet(
-    //     IERC1155 _l1TokenContract,
-    //     uint256 _l2TokenContract,
-    //     uint256[] memory _tokensId,
-    //     uint256[] memory _amounts,
-    //     uint256 _account
-    // ) external {
-    //     uint256[] memory payload = new uint256[5];
+    function bridgeToStarknet(
+        IERC1155 _l1TokenContract,
+        uint256 _l2TokenContract,
+        uint256[] memory _tokensId,
+        uint256[] memory _amounts,
+        uint256 _account
+    ) external {
+        require(
+            _tokensId.length == _amounts.length,
+            "The Size of array tokenID and array amounts should be the same"
+        );
 
-    //     // optimistic transfer, should revert if no approved or not owner
-    //     _l1TokenContract.safeBatchTransferFrom(
-    //         msg.sender,
-    //         address(this),
-    //         _tokensId,
-    //         _amounts
-    //     );
+        // optimistic transfer, should revert if no approved or not owner
+        _l1TokenContract.safeBatchTransferFrom(
+            msg.sender,
+            address(this),
+            _tokensId,
+            _amounts
+        );
 
-    //     // build deposit message payload
-    //     payload[0] = _account;
-    //     payload[1] = addressToUint(address(_l1TokenContract));
-    //     payload[2] = _l2TokenContract;
-    //     payload[3] = _tokensId;
-    //     payload[4] = _amounts;
+        uint256 size = 4 + (_tokensId.length * 2);
+        uint256 index = 0;
+        uint256[] memory payload = new uint256[](size);
 
-    //     // send message
-    //     starknetCore.sendMessageToL2(
-    //         endpointGateway,
-    //         ENDPOINT_GATEWAY_SELECTOR,
-    //         payload
-    //     );
-    // }
+        // build withdraw message payload
+        payload[0] = BRIDGE_MODE_WITHDRAW;
+        payload[1] = addressToUint(msg.sender);
+        payload[2] = addressToUint(address(_l1TokenContract));
+        payload[3] = _l2TokenContract;
+
+        for (uint256 i = 4; i < size; i++) {
+            require(
+                index < _tokensId.length,
+                "You can not access to that element"
+            );
+            payload[i] = _tokensId[index];
+            i++;
+            payload[i] = _amounts[index];
+            index++;
+        }
+
+        // send message
+        starknetCore.sendMessageToL2(
+            endpointGateway,
+            ENDPOINT_GATEWAY_SELECTOR,
+            payload
+        );
+    }
 
     // Bridging back from Starknet
     function bridgeFromStarknet(

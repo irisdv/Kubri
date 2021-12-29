@@ -348,16 +348,16 @@ end
 #     return ()
 # end
 
-# @external
-# func create_token_batch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-#         owner : felt, tokens_id_len : felt, tokens_id : felt*, amounts_len : felt, amounts : felt*):
-#     let (caller) = get_caller_address()
-#     let (_gateway_address- = gateway_address.read()
-#     assert caller = _gateway_address
+@external
+func create_token_batch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        owner : felt, tokens_id_len : felt, tokens_id : felt*, amounts_len : felt, amounts : felt*):
+    let (caller) = get_caller_address()
+    let (_gateway_address- = gateway_address.read()
+    assert caller = _gateway_address
 
-# _mint_batch(owner, tokens_id_len, tokens_id,amounts_len, amounts)
-#     return ()
-# end
+    _mint_batch(owner, tokens_id_len, tokens_id,amounts_len, amounts)
+    return ()
+end
 
 # @external
 # func delete_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(

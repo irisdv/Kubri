@@ -18,6 +18,11 @@ namespace IBridgedERC1155:
             owner : felt, tokens_id_len : felt, tokens_id : felt*, amounts_len : felt,
             amounts : felt*):
     end
+
+    func create_token_batch(
+            owner : felt, tokens_id_len : felt, tokens_id : felt*, amounts_len : felt,
+            amounts : felt*):
+    end
 end
 
 # construction guard
@@ -37,7 +42,8 @@ end
 
 # keep track of deposit messages, before minting
 @storage_var
-func mint_credits(l1_token_address : felt, token_id : felt, owner : felt) -> (res : felt):
+func mint_credits(l1_token_address : felt, token_id : felt, amount : felt, owner : felt) -> (
+        res : felt):
 end
 
 @constructor
@@ -187,35 +193,129 @@ func write_custody_l2{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
         amounts=amounts + 1)
 end
 
-@view
-func get_mint_credit{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        _l1_token_address : felt, _token_id : felt, _owner : felt) -> (res : felt):
-    let (res) = mint_credits.read(
-        l1_token_address=_l1_token_address, token_id=_token_id, owner=_owner)
-    return (res)
+func write_mint_credit{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        l2_token_address : felt, l1_token_address : felt, tokens_id_len : felt, tokens_id : felt*,
+        amounts_len : felt, amounts : felt*, owner : felt):
+    assert tokens_id_len = amounts_len
+    if tokens_id_len == 0:
+        return ()
+    end
+    mint_credits.write(
+        l1_token_address=l1_token_address,
+        token_id=[tokens_id],
+        amount=[amounts],
+        owner=owner,
+        value=l2_token_address)
+
+    return write_mint_credit(
+        l2_token_address=l2_token_address,
+        l1_token_address=l1_token_address,
+        tokens_id_len=tokens_id_len - 1,
+        tokens_id=tokens_id + 1,
+        amounts_len=amounts_len - 1,
+        amounts=amounts + 1,
+        owner=owner)
 end
 
-# tries to consume mint credit
-# @external
-# func consume_mint_credit{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-#         _l1_token_address : felt, _l2_token_address : felt, _token_id : felt, _l2_owner):
-#     let (l2_token_address) = mint_credits.read(
-#         l1_token_address=_l1_token_address, token_id=_token_id, owner=_l2_owner)
+func read_mint_credit{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        l2_token_address : felt, l1_token_address : felt, tokens_id_len : felt, tokens_id : felt*,
+        amounts_len : felt, amounts : felt*, owner : felt) -> (res : felt):
+    assert tokens_id_len = amounts_len
+    if tokens_id_len == 0:
+        return (l2_token_address)
+    end
+    let (res) = mint_credits.read(
+        l1_token_address=l1_token_address, token_id=[tokens_id], amount=[amounts], owner=owner)
 
-# assert_not_zero(l2_token_address)
+    assert res = l2_token_address
 
-# let (l1_token_address) = IBridgedERC1155.get_l1_address(contract_address=_l2_token_address)
+    return read_mint_credit(
+        l2_token_address=l2_token_address,
+        l1_token_address=l1_token_address,
+        tokens_id_len=tokens_id_len - 1,
+        tokens_id=tokens_id + 1,
+        amounts_len=amounts_len - 1,
+        amounts=amounts + 1,
+        owner=owner)
+end
 
-# assert l1_token_address = _l1_token_address
-
-# IBridgedERC1155.create_token(
-#         contract_address=_l2_token_address, owner=_l2_owner, token_id=_token_id)
-#     custody.write(l1_token_address=_l1_token_address, token_id=_token_id, value=_l2_token_address)
-#     mint_credits.write(
-#         l1_token_address=_l1_token_address, token_id=_token_id, owner=_l2_owner, value=0)
-
-# return ()
+# @view
+# func get_mint_credit{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+#         _l1_token_address : felt, _token_id : felt, _owner : felt) -> (res : felt):
+#     let (res) = mint_credits.read(
+#         l1_token_address=_l1_token_address, token_id=_token_id, owner=_owner)
+#     return (res)
 # end
+
+# tries to consume mint credit
+@external
+func consume_mint_credit{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        _l1_token_address : felt, _l2_token_address : felt, _tokens_id_len : felt,
+        _tokens_id : felt*, _amounts_len : felt, _amounts : felt*, _l2_owner : felt):
+    let (l2_token_address) = read_mint_credit(
+        l1_token_address=_l1_token_address, token_id=_token_id, owner=_l2_owner)
+
+    assert_not_zero(l2_token_address)
+
+    let (l1_token_address) = IBridgedERC1155.get_l1_address(contract_address=_l2_token_address)
+
+    assert l1_token_address = _l1_token_address
+
+    IBridgedERC1155.create_token_batch(
+        contract_address=_l2_token_address,
+        owner=_l2_owner,
+        tokens_id_len=_tokens_id_len,
+        token_id=_token_id,
+        amounts_len=_amounts_len,
+        amounts=_amounts)
+
+    write_custody_l2(
+        l2_token_address=l2_token_address,
+        l1_token_address=_l1_token_address,
+        tokens_id_len=_tokens_id_len,
+        tokens_id=_tokens_id,
+        amounts_len=_amounts_len,
+        amounts=_amounts)
+
+    write_mint_credit(
+        l2_token_address=0,
+        l1_token_address=_l1_token_address,
+        tokens_id_len=_tokens_id_len,
+        tokens_id=_tokens_id,
+        amounts_len=_amounts_len,
+        amounts=_amounts,
+        owner=_l2_owner)
+
+    return ()
+end
+
+# receive and handle deposit messages
+@l1_handler
+func bridge_from_mainnet{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        from_address : felt, _owner : felt, _l1_token_address : felt, _l2_token_address : felt,
+        _tokens_id_len : felt, _tokens_id : felt*, _amounts_len : felt, _amounts : felt*):
+    let (res) = l1_gateway.read()
+    assert from_address = res
+
+    let (current_custody_l2) = read_custody_l2(
+        l2_token_address=_l2_token_address,
+        tokens_id_len=_tokens_id_len,
+        tokens_id=_tokens_id,
+        amounts_len=_amounts_len,
+        amounts=_amounts)
+    assert current_custody_l2 = 0
+
+    write_mint_credit(
+        l2_token_address=_l2_token_address,
+        l1_token_address=_l1_token_address,
+        tokens_id_len=_tokens_id_len,
+        tokens_id=_tokens_id,
+        amounts_len=_amounts_len,
+        amounts=_amounts,
+        owner=_owner)
+
+    return ()
+end
 
 # ############ test function ###################@
 @view

@@ -36,7 +36,7 @@
     "lodash" "^4.17.21"
     "resize-observer-polyfill" "^1.5.0"
 
-"@argent/get-starknet@^0.1.3":
+"@argent/get-starknet@^0.1.4":
   "integrity" "sha512-owF5nPajqjPGhirI+FyK8UbXwkzif646Wymwee8gsz/uaftc6vCh+HkKUYLmD7Y3qLnEXzHykc6VnwLHk+Velw=="
   "resolved" "https://registry.npmjs.org/@argent/get-starknet/-/get-starknet-0.1.4.tgz"
   "version" "0.1.4"
@@ -12267,10 +12267,10 @@
   dependencies:
     "escape-string-regexp" "^2.0.0"
 
-"starknet@^2.0.2", "starknet@^2.3.1":
-  "integrity" "sha512-A5/POnt1s5gocVTx4NdrJDekhguLLvLQtgALV2w6sVNiCN8/yT2OIcUHjg1F82FB+vfE8usf2X8ccGyMwQteHw=="
-  "resolved" "https://registry.npmjs.org/starknet/-/starknet-2.3.1.tgz"
-  "version" "2.3.1"
+"starknet@^2.3.1", "starknet@^2.5.0":
+  "integrity" "sha512-vW07z9JcHQVxk6US2nh1A+Z2ZBWlWviy32KTBm7MUzNewT8lgRRrIK9pPH6yWxpAPaRlD/u+7C0Vjp1Nbowtjg=="
+  "resolved" "https://registry.npmjs.org/starknet/-/starknet-2.5.0.tgz"
+  "version" "2.5.0"
   dependencies:
     "axios" "^0.23.0"
     "bn.js" "^5.2.0"
@@ -12280,6 +12280,7 @@
     "json-bigint" "^1.0.0"
     "minimalistic-assert" "^1.0.1"
     "pako" "^2.0.4"
+    "superstruct" "^0.15.3"
     "url-join" "^4.0.1"
 
 "static-extend@^0.1.1":
@@ -12572,6 +12573,11 @@
   "integrity" "sha512-m3k+dk7QeJw660eIKRRn3xPF6uuvHs/FFzjX3HQ5ove0qYsiygoAhwn5a3IYKaZPo5LrYD0rfVmtv1gNY1uYwg=="
   "resolved" "https://registry.npmjs.org/stylis/-/stylis-4.0.10.tgz"
   "version" "4.0.10"
+
+"superstruct@^0.15.3":
+  "integrity" "sha512-wilec1Rg3FtKuRjRyCt70g5W29YUEuaLnybdVQUI+VQ7m0bw8k7TzrRv5iYmo6IpjLVrwxP5t3RgjAVqhYh4Fg=="
+  "resolved" "https://registry.npmjs.org/superstruct/-/superstruct-0.15.3.tgz"
+  "version" "0.15.3"
 
 "supports-color@^2.0.0":
   "integrity" "sha1-U10EXOa2Nj+kARcIRimZXp3zJMc="
