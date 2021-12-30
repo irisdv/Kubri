@@ -27,6 +27,7 @@ module.exports = {
     resolve: {
         extensions: ['.ts', '.tsx', '.js', '.jsx', '.json']
     },
+    devtool: "source-map",
     module: {
         rules: [{
                 test: /\.(js|jsx|tsx|ts)?$/,
@@ -88,7 +89,7 @@ module.exports = {
     ],
     devServer: {
         liveReload: true,
-        hot: true,
+        // hot: true,
         historyApiFallback: true,
     },
 }
