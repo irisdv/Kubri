@@ -38,15 +38,21 @@ function reducer(
 }
 
 export function useStarknetManager(): StarknetState {
-  const starknet = getStarknet({ showModal: true });
+  const starknet = getStarknet({ showModal: false });
+  console.log('starknet', starknet);
   const [state, dispatch] = React.useReducer(reducer, {
     library: defaultProvider,
   });
 
   const { account, library } = state;
 
+  console.log('library', library);
+
   const connectBrowserWallet = React.useCallback(async () => {
+    console.log('test');
+    console.log('starknet', starknet);
     const [account] = await starknet.enable();
+    console.log('account', account);
     dispatch({ type: "set_account", account });
     if (starknet.signer) {
       dispatch({ type: "set_provider", provider: starknet.signer });
