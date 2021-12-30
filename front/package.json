@@ -16,11 +16,15 @@
     "@walletconnect/web3-provider": "^1.0.8",
     "antd": "^4.17.2",
     "assert": "^2.0.0",
+    "axios": "^0.24.0",
     "bn.js": "^5.2.0",
     "enc-utils": "^3.0.0",
     "ethers": "^5.5.1",
     "framer-motion": "^4.1.17",
+    "ipfs-car": "^0.6.1",
     "js-sha3": "^0.8.0",
+    "nft.storage": "^5.2.0",
+    "node-polyfill-webpack-plugin": "^1.1.4",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-scripts": "^3.4.4",
@@ -32,9 +36,10 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "dev": "webpack serve --mode=development --output-path ./ --port 3100 --hot",
+    "build": "webpack --mode=production"
   },
   "eslintConfig": {
     "extends": [
@@ -55,6 +60,21 @@
     ]
   },
   "devDependencies": {
-    "@types/react-router-dom": "^5.3.2"
+    "@babel/core": "latest",
+    "@babel/plugin-transform-runtime": "^7.15.0",
+    "@babel/preset-env": "latest",
+    "@babel/preset-react": "latest",
+    "@types/react-router-dom": "^5.3.2",
+    "dotenv-webpack": "^7.0.3",
+    "html-loader": "^3.0.1",
+    "html-webpack-plugin": "^5.5.0",
+    "postcss": "^8.4.5",
+    "postcss-loader": "^6.2.1",
+    "style-loader": "latest",
+    "tailwindcss": "^3.0.8",
+    "ts-loader": "^9.2.6",
+    "webpack": "^5.65.0",
+    "webpack-cli": "^4.9.1",
+    "webpack-dev-server": "^4.7.2"
   }
 }
