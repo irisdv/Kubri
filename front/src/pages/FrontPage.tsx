@@ -9,8 +9,8 @@ import {
     BlockHashProvider,
     useBlockHash,
 } from "../providers/BlockHashProvider";
-import { StarknetProvider } from "../providers/StarknetProvider";
-import { TransactionsProvider, useTransactions } from "../providers/TransactionsProvider";
+// import { StarknetProvider } from "../providers/StarknetProvider";
+import { useTransactions } from "../providers/TransactionsProvider";
 import { useStarknet } from "../providers/StarknetProvider";
 import { ConnectedOnly } from "../components/ConnectedOnly";
 import { VoyagerLink } from "../components/VoyagerLink";

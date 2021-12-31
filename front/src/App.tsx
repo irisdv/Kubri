@@ -1,6 +1,7 @@
-import React from "react";
+import * as React from 'react'
 import "./App.css";
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+// import { BrowserRouter, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Route } from "react-router-dom";
 import { FrontPage } from "./pages/FrontPage";
 // import { MintPage } from "./pages/MintPage";
 
@@ -16,25 +17,23 @@ function App() {
 
     return (
         <>
-            <BrowserRouter>
+            <Router>
                 <HeaderSite />
-                <Routes>
-                    <Route path="/" element={<FrontPage />} />
-                    {/* <Route path="/mint" element={<MintPage />} /> */}
-                </Routes>
-            </BrowserRouter>
+                <Route exact path="/"> <FrontPage /></Route>
+                {/* <Route path="/mint"><MintPage /></Route> */}
+            </Router>
         </>
     );
 }
 
 function AppWithProviders() {
     return (
-        <StarknetProvider>
+        <StarknetProvider> 
             <BlockHashProvider>
                 <TransactionsProvider>
                     <App />
                 </TransactionsProvider>
-            </BlockHashProvider>
+            </BlockHashProvider> 
         </StarknetProvider>
     );
 }

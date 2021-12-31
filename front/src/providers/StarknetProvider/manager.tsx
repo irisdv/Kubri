@@ -49,8 +49,7 @@ export function useStarknetManager(): StarknetState {
   console.log('library', library);
 
   const connectBrowserWallet = React.useCallback(async () => {
-    console.log('test');
-    console.log('starknet', starknet);
+    console.log('starknet ds connectBrowserWallet', starknet);
     const [account] = await starknet.enable();
     console.log('account', account);
     dispatch({ type: "set_account", account });

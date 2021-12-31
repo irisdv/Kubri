@@ -8,8 +8,8 @@ const babelOptions = {
       [
         '@babel/preset-env',
         {
-          targets: 'last 2 versions, ie 11',
-          modules: false,
+            targets: 'last 2 versions, ie 11',
+            modules: false,
         },
       ],
       "@babel/preset-react",
@@ -28,6 +28,9 @@ module.exports = {
         extensions: ['.ts', '.tsx', '.js', '.jsx', '.json']
     },
     devtool: "source-map",
+    watchOptions: {
+        ignored: /node_modules/,
+    },
     module: {
         rules: [{
                 test: /\.(js|jsx|tsx|ts)?$/,
@@ -89,7 +92,7 @@ module.exports = {
     ],
     devServer: {
         liveReload: true,
-        // hot: true,
+        hot: true,
         historyApiFallback: true,
     },
 }

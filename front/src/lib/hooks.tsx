@@ -17,8 +17,8 @@ export function useStarknetCall(
       // console.log('method', method);
       // console.log('contract', contract);
       // console.log('args', args);
-      // await contract.call(method, args).then((res) => setValue(res)).catch((err) => console.log(err));
-      contract.call(method, args).then((res) => setValue(res));
+      await contract.call(method, args).then((res) => setValue(res)).catch((err) => console.log(err));
+      // contract.call(method, args).then((res) => setValue(res));
     }
   }, [contract, method, args]);
 
