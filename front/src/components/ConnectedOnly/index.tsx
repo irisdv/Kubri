@@ -8,8 +8,7 @@ interface ConnectedOnlyProps {
 export function ConnectedOnly({ children }: ConnectedOnlyProps): JSX.Element {
   const { account, connectBrowserWallet } = useStarknet();
 
-  console.log('account component', account);
-  console.log('children', children);
+  console.log('account component in ConnectedOnly', account);
 
   if (!account) {
     return (

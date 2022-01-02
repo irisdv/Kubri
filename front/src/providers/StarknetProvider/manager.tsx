@@ -24,6 +24,8 @@ function reducer(
   state: StarknetManagerState,
   action: Action
 ): StarknetManagerState {
+  console.log('Action', action);
+  console.log('action type', action.type)
   switch (action.type) {
     case "set_account": {
       return { ...state, account: action.account };
@@ -40,6 +42,7 @@ function reducer(
 export function useStarknetManager(): StarknetState {
   const starknet = getStarknet({ showModal: false });
   console.log('starknet', starknet);
+  console.log('reducer', reducer);
   const [state, dispatch] = React.useReducer(reducer, {
     library: defaultProvider,
   });
@@ -47,6 +50,7 @@ export function useStarknetManager(): StarknetState {
   const { account, library } = state;
 
   console.log('library', library);
+  console.log('state', state);
 
   const connectBrowserWallet = React.useCallback(async () => {
     console.log('starknet ds connectBrowserWallet', starknet);

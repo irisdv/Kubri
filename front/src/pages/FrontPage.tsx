@@ -86,7 +86,7 @@ export function FrontPage() {
                                 <div className="card shadow-lg">
                                     <div className="card-body">
                                         <h2 className="card-title">Mint ERC1155 NFT on Starknet</h2> 
-                                        <ConnectedOnly>
+                                        {/* <ConnectedOnly> */}
                                             test
                                             {/* <p>Balance 1 of user connected is currently <b>{balance1?.res}</b></p> */}
                                             {/* <p>Balance 2 of user connected is currently <b>{balance2?.res}</b></p> */}
@@ -95,7 +95,7 @@ export function FrontPage() {
                                             {/* <p>Connected user's Approval <b>{isApproval?.res}</b></p> */}
                                             {/* <BridgeToL1 contract={gatewayContract} tokensIdLen={tokensId.length} tokensId={tokensId} amountsLen={amounts.length} amounts={amounts} /> */}
 
-                                        </ConnectedOnly>
+                                        {/* </ConnectedOnly> */}
                                     </div>
                                 </div>
 

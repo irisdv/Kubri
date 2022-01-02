@@ -20,14 +20,14 @@ const babelOptions = {
 module.exports = {
     entry: './src/index.tsx',
     output: {
-        path: path.resolve(__dirname, 'dist'),
+        path: path.join(__dirname, 'dist'),
         filename: 'bundle.js',
         publicPath: '/'
     },
     resolve: {
         extensions: ['.ts', '.tsx', '.js', '.jsx', '.json']
     },
-    devtool: "source-map",
+    devtool: "inline-source-map",
     watchOptions: {
         ignored: /node_modules/,
     },
@@ -75,11 +75,6 @@ module.exports = {
             },
         ]
     },
-    devServer: {
-        historyApiFallback: true,
-        liveReload: true,
-        hot: true
-    },
     plugins: [
         new HtmlWebpackPlugin({
             template: 'src/index.html',
@@ -91,8 +86,8 @@ module.exports = {
         new NodePolyfillPlugin()
     ],
     devServer: {
-        liveReload: true,
-        hot: true,
         historyApiFallback: true,
+        liveReload: true,
+        // hot: true
     },
 }
