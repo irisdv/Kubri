@@ -5,7 +5,7 @@
 // Runtime Environment's members available in the global scope.
 import { ethers } from "hardhat";
 
-const L1_STARKNET_CORE = '0x5e6229F2D4d977d20A50219E521dE6Dd694d45cc';
+const L1_STARKNET_CORE = '0xde29d060D45901Fb19ED6C6e959EB22d8626708e';
 
 async function main() {
   console.log("jedqghjfgsgqfgs");

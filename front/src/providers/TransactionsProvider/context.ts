@@ -26,6 +26,7 @@ export function useTransaction(
     const storedTransaction = transactions.find(
       (stored: StoredTransaction) => stored.hash === hash
     );
+    console.log(storedTransaction)
     if (storedTransaction) {
       setTransaction(storedTransaction);
     }

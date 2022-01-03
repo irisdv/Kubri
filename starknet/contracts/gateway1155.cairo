@@ -23,6 +23,9 @@ namespace IBridgedERC1155:
             owner : felt, tokens_id_len : felt, tokens_id : felt*, amounts_len : felt,
             amounts : felt*):
     end
+
+    func get_l1_address() -> (address : felt):
+    end
 end
 
 # construction guard
@@ -33,6 +36,10 @@ end
 # l1 gateway address
 @storage_var
 func l1_gateway() -> (res : felt):
+end
+
+@storage_var
+func get_caller_info() -> (res : felt):
 end
 
 # keep track of the minted L2 ERC1155 bridged to L1
@@ -62,11 +69,10 @@ end
 @external
 func bridge_to_mainnet{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         _l1_token_address : felt, _l2_token_address : felt, _tokens_id_len : felt,
-        _tokens_id : felt*, _amounts_len : felt, _amounts : felt*, _l1_owner : felt) -> (
-        res_len : felt, res : felt*):
+        _tokens_id : felt*, _amounts_len : felt, _amounts : felt*, _l1_owner : felt):
     alloc_locals
     let (local caller_address : felt) = get_caller_address()
-
+    get_caller_info.write(_l2_token_address)
     # check owner of the ERC1155 to bridge is the caller
     IBridgedERC1155.safe_is_approved(contract_address=_l2_token_address, _from=caller_address)
 
@@ -114,23 +120,18 @@ func bridge_to_mainnet{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
         amounts=_amounts,
         index=4)
 
-    # assert message_payload[4] = _tokens_id_len
-    # message_payload[5] = _tokens_id
-    # assert message_payload[5] = _amounts_len
-    # message_payload[7] = _amounts
-
     send_message_to_l1(
         to_address=l1_gateway_address, payload_size=payload_size, payload=message_payload)
 
-    # write_custody_l2(
-    #     l2_token_address=_l2_token_address,
-    #     l1_token_address=0,
-    #     tokens_id_len=_tokens_id_len,
-    #     tokens_id=_tokens_id,
-    #     amounts_len=_amounts_len,
-    #     amounts=_amounts)
-
-    return (payload_size, message_payload)
+    write_custody_l2(
+        l2_token_address=_l2_token_address,
+        l1_token_address=0,
+        tokens_id_len=_tokens_id_len,
+        tokens_id=_tokens_id,
+        amounts_len=_amounts_len,
+        amounts=_amounts)
+    return ()
+    # return (payload_size, message_payload)
 end
 
 @view
@@ -230,7 +231,7 @@ func read_mint_credit{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     assert res = l2_token_address
 
     return read_mint_credit(
-        l2_token_address=l2_token_address,
+        l2_token_address=res,
         l1_token_address=l1_token_address,
         tokens_id_len=tokens_id_len - 1,
         tokens_id=tokens_id + 1,
@@ -252,10 +253,17 @@ end
 func consume_mint_credit{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         _l1_token_address : felt, _l2_token_address : felt, _tokens_id_len : felt,
         _tokens_id : felt*, _amounts_len : felt, _amounts : felt*, _l2_owner : felt):
-    let (l2_token_address) = read_mint_credit(
-        l1_token_address=_l1_token_address, token_id=_token_id, owner=_l2_owner)
+    alloc_locals
+    let (local tmp_l2_token_address : felt) = read_mint_credit(
+        l2_token_address=_l2_token_address,
+        l1_token_address=_l1_token_address,
+        tokens_id_len=_tokens_id_len,
+        tokens_id=_tokens_id,
+        amounts_len=_amounts_len,
+        amounts=_amounts,
+        owner=_l2_owner)
 
-    assert_not_zero(l2_token_address)
+    assert_not_zero(tmp_l2_token_address)
 
     let (l1_token_address) = IBridgedERC1155.get_l1_address(contract_address=_l2_token_address)
 
@@ -265,12 +273,12 @@ func consume_mint_credit{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
         contract_address=_l2_token_address,
         owner=_l2_owner,
         tokens_id_len=_tokens_id_len,
-        token_id=_token_id,
+        tokens_id=_tokens_id,
         amounts_len=_amounts_len,
         amounts=_amounts)
 
     write_custody_l2(
-        l2_token_address=l2_token_address,
+        l2_token_address=_l2_token_address,
         l1_token_address=_l1_token_address,
         tokens_id_len=_tokens_id_len,
         tokens_id=_tokens_id,
@@ -322,6 +330,12 @@ end
 func get_l1_gateway{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
         res : felt):
     let (res) = l1_gateway.read()
+    return (res)
+end
+@view
+func get_caller_gateway{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
+        res : felt):
+    let (res) = get_caller_info.read()
     return (res)
 end
 

@@ -56,12 +56,13 @@ contract Gateway1155 {
         );
 
         // optimistic transfer, should revert if no approved or not owner
-        _l1TokenContract.safeBatchTransferFrom(
-            msg.sender,
-            address(this),
-            _tokensId,
-            _amounts
-        );
+        // _l1TokenContract.safeBatchTransferFrom(
+        //     msg.sender,
+        //     address(this),
+        //     _tokensId,
+        //     _amounts,
+        //     []
+        // );
 
         uint256 size = 4 + (_tokensId.length * 2);
         uint256 index = 0;
@@ -92,6 +93,82 @@ contract Gateway1155 {
         );
     }
 
+    function bridgeFromStarknetAvailable(
+        IERC1155 _l1TokenContract,
+        uint256 _l2TokenContract,
+        uint256[] memory _tokensId,
+        uint256[] memory _amounts
+    ) external view returns (bool) {
+        uint256 size = 4 + (_tokensId.length * 2);
+        uint256 index = 0;
+        uint256[] memory payload = new uint256[](size);
+        // build withdraw message payload
+        payload[0] = BRIDGE_MODE_WITHDRAW;
+        payload[1] = addressToUint(msg.sender);
+        payload[2] = addressToUint(address(_l1TokenContract));
+        payload[3] = _l2TokenContract;
+
+        for (uint256 i = 4; i < size; i++) {
+            require(
+                index < _tokensId.length,
+                "You can not access to that element"
+            );
+            payload[i] = _tokensId[index];
+            i++;
+            payload[i] = _amounts[index];
+            index++;
+        }
+
+        bytes32 msgHash = keccak256(
+            abi.encodePacked(
+                endpointGateway,
+                addressToUint(address(this)),
+                payload.length,
+                payload
+            )
+        );
+
+        return starknetCore.l2ToL1Messages(msgHash) > 0;
+    }
+
+    function debug_bridgeFromStarknetAvailable(
+        IERC1155 _l1TokenContract,
+        uint256 _l2TokenContract,
+        uint256[] memory _tokensId,
+        uint256[] memory _amounts
+    ) external view returns (bytes32) {
+        uint256 size = 4 + (_tokensId.length * 2);
+        uint256 index = 0;
+        uint256[] memory payload = new uint256[](size);
+        // build withdraw message payload
+        payload[0] = BRIDGE_MODE_WITHDRAW;
+        payload[1] = addressToUint(msg.sender);
+        payload[2] = addressToUint(address(_l1TokenContract));
+        payload[3] = _l2TokenContract;
+
+        for (uint256 i = 4; i < size; i++) {
+            require(
+                index < _tokensId.length,
+                "You can not access to that element"
+            );
+            payload[i] = _tokensId[index];
+            i++;
+            payload[i] = _amounts[index];
+            index++;
+        }
+
+        bytes32 msgHash = keccak256(
+            abi.encodePacked(
+                endpointGateway,
+                addressToUint(address(this)),
+                payload.length,
+                payload
+            )
+        );
+
+        return msgHash;
+    }
+
     // Bridging back from Starknet
     function bridgeFromStarknet(
         IERC1155 _l1TokenContract,
@@ -107,7 +184,6 @@ contract Gateway1155 {
         uint256 size = 4 + (_tokensId.length * 2);
         uint256 index = 0;
         uint256[] memory payload = new uint256[](size);
-
         // build withdraw message payload
         payload[0] = BRIDGE_MODE_WITHDRAW;
         payload[1] = addressToUint(msg.sender);

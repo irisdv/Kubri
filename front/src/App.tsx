@@ -41,8 +41,11 @@ function App() {
     const balance2 = useStarknetCall(bridged1155Contract, "balance_of", { account, tokensId2 });
 
     const gatewayContractAddress = gatewayContract?.connectedTo;
-    const isApproval = useStarknetCall(bridged1155Contract, "is_approved_for_all", { account, gatewayContractAddress });
-    const [amounts, setAmounts] = React.useState([balance1, balance2]);
+    const bridged1155ContractAddress = bridged1155Contract?.connectedTo;
+    console.log(account)
+    console.log(bridged1155ContractAddress)
+    const isApproval = useStarknetCall(bridged1155Contract, "is_approved_for_all", { account, bridged1155ContractAddress });
+    const [amounts, setAmounts] = React.useState(["0x3", "0x2"]);
     const { transactions } = useTransactions();
 
     return (
@@ -88,7 +91,7 @@ function App() {
                                 <InitializeNFT contract={bridged1155Contract} />
                                 <SetApproval contract={bridged1155Contract} />
                                 <p>Connected user's Approval <b>{isApproval?.res}</b></p>
-                                <BridgeToL1 contract={gatewayContract} tokensIdLen={tokensId.length} tokensId={tokensId} amountsLen={amounts.length} amounts={amounts} />
+                                <BridgeToL1 contract={gatewayContract} tokensIdLen={(tokensId.length).toString(16)} tokensId={tokensId} amountsLen={(amounts.length).toString(16)} amounts={amounts} />
 
                             </ConnectedOnly>
                         </Card>

@@ -26,6 +26,14 @@ end
 func gateway_address() -> (res : felt):
 end
 
+@storage_var
+func get_caller_erc() -> (res : felt):
+end
+
+@storage_var
+func get_address_erc() -> (res : felt):
+end
+
 struct BlockchainNamespace:
     member a : felt
 end
@@ -293,7 +301,8 @@ end
 func _assert_is_owner_or_approved{
         pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(address : felt):
     let (caller) = get_caller_address()
-
+    # get_caller_erc.write(caller)
+    get_address_erc.write(address)
     if caller == address:
         return ()
     end
@@ -347,16 +356,16 @@ end
 #     return ()
 # end
 
-# @external
-# func create_token_batch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-#         owner : felt, tokens_id_len : felt, tokens_id : felt*, amounts_len : felt, amounts : felt*):
-#     let (caller) = get_caller_address()
-#     let (_gateway_address- = gateway_address.read()
-#     assert caller = _gateway_address
+@external
+func create_token_batch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        owner : felt, tokens_id_len : felt, tokens_id : felt*, amounts_len : felt, amounts : felt*):
+    let (caller) = get_caller_address()
+    let (_gateway_address) = gateway_address.read()
+    assert caller = _gateway_address
 
-# _mint_batch(owner, tokens_id_len, tokens_id,amounts_len, amounts)
-#     return ()
-# end
+    _mint_batch(owner, tokens_id_len, tokens_id, amounts_len, amounts)
+    return ()
+end
 
 # @external
 # func delete_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
@@ -386,6 +395,20 @@ end
 func get_l1_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
         address : felt):
     let (address) = l1_address.read()
+    return (address)
+end
+
+@view
+func get_caller_adderc{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
+        address : felt):
+    let (address) = get_caller_erc.read()
+    return (address)
+end
+
+@view
+func get_adderc{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
+        address : felt):
+    let (address) = get_address_erc.read()
     return (address)
 end
 

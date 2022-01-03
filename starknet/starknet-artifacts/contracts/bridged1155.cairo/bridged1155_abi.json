@@ -39,18 +39,6 @@
                 "type": "felt"
             }
         ],
-        "name": "BlockchainReference",
-        "size": 1,
-        "type": "struct"
-    },
-    {
-        "members": [
-            {
-                "name": "a",
-                "offset": 0,
-                "type": "felt"
-            }
-        ],
         "name": "TokenId",
         "size": 1,
         "type": "struct"
@@ -88,6 +76,18 @@
             }
         ],
         "name": "BlockchainNamespace",
+        "size": 1,
+        "type": "struct"
+    },
+    {
+        "members": [
+            {
+                "name": "a",
+                "offset": 0,
+                "type": "felt"
+            }
+        ],
+        "name": "BlockchainReference",
         "size": 1,
         "type": "struct"
     },
@@ -392,6 +392,33 @@
                 "type": "felt*"
             }
         ],
+        "name": "create_token_batch",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "owner",
+                "type": "felt"
+            },
+            {
+                "name": "tokens_id_len",
+                "type": "felt"
+            },
+            {
+                "name": "tokens_id",
+                "type": "felt*"
+            },
+            {
+                "name": "amounts_len",
+                "type": "felt"
+            },
+            {
+                "name": "amounts",
+                "type": "felt*"
+            }
+        ],
         "name": "delete_token_batch",
         "outputs": [],
         "type": "function"
@@ -399,6 +426,30 @@
     {
         "inputs": [],
         "name": "get_l1_address",
+        "outputs": [
+            {
+                "name": "address",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_caller_adderc",
+        "outputs": [
+            {
+                "name": "address",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_adderc",
         "outputs": [
             {
                 "name": "address",
