@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import "./FakeErc1155.sol";
 import "./IStarknetCore.sol";
 
-contract Gateway1155 {
+contract Gateway1155 is ERC1155 {
     address public initialEndpointGatewaySetter;
     uint256 public endpointGateway;
     IStarknetCore public starknetCore;
@@ -14,7 +15,7 @@ contract Gateway1155 {
     uint256 constant BRIDGE_MODE_WITHDRAW = 1;
 
     // Bootstrap
-    constructor(address _starknetCore) {
+    constructor(address _starknetCore) ERC1155("Gateway ERC1155") {
         require(
             _starknetCore != address(0),
             "Gateway/invalid-starknet-core-address"
@@ -44,7 +45,7 @@ contract Gateway1155 {
 
     // Bridging to Starknet
     function bridgeToStarknet(
-        IERC1155 _l1TokenContract,
+        ERC1155 _l1TokenContract,
         uint256 _l2TokenContract,
         uint256[] memory _tokensId,
         uint256[] memory _amounts,
@@ -55,31 +56,23 @@ contract Gateway1155 {
             "The Size of array tokenID and array amounts should be the same"
         );
 
-        // optimistic transfer, should revert if no approved or not owner
-        // _l1TokenContract.safeBatchTransferFrom(
-        //     msg.sender,
-        //     address(this),
-        //     _tokensId,
-        //     _amounts,
-        //     []
-        // );
-
-        uint256 size = 4 + (_tokensId.length * 2);
+        uint256 size = 5 + (_tokensId.length * 2);
         uint256 index = 0;
+        uint256 i = 4;
         uint256[] memory payload = new uint256[](size);
 
-        // build withdraw message payload
-        payload[0] = BRIDGE_MODE_WITHDRAW;
-        payload[1] = addressToUint(msg.sender);
-        payload[2] = addressToUint(address(_l1TokenContract));
-        payload[3] = _l2TokenContract;
-
-        for (uint256 i = 4; i < size; i++) {
-            require(
-                index < _tokensId.length,
-                "You can not access to that element"
-            );
+        payload[0] = _account;
+        payload[1] = addressToUint(address(_l1TokenContract));
+        payload[2] = _l2TokenContract;
+        payload[3] = _tokensId.length;
+        while (index < _tokensId.length) {
             payload[i] = _tokensId[index];
+            index++;
+            i++;
+        }
+        index = 0;
+        payload[i] = _amounts.length;
+        while (index < _amounts.length) {
             i++;
             payload[i] = _amounts[index];
             index++;
@@ -94,7 +87,7 @@ contract Gateway1155 {
     }
 
     function bridgeFromStarknetAvailable(
-        IERC1155 _l1TokenContract,
+        ERC1155 _l1TokenContract,
         uint256 _l2TokenContract,
         uint256[] memory _tokensId,
         uint256[] memory _amounts
@@ -132,7 +125,7 @@ contract Gateway1155 {
     }
 
     function debug_bridgeFromStarknetAvailable(
-        IERC1155 _l1TokenContract,
+        ERC1155 _l1TokenContract,
         uint256 _l2TokenContract,
         uint256[] memory _tokensId,
         uint256[] memory _amounts
@@ -171,7 +164,7 @@ contract Gateway1155 {
 
     // Bridging back from Starknet
     function bridgeFromStarknet(
-        IERC1155 _l1TokenContract,
+        FakeErc1155 _l1TokenContract,
         uint256 _l2TokenContract,
         uint256[] memory _tokensId,
         uint256[] memory _amounts
@@ -204,6 +197,7 @@ contract Gateway1155 {
         // consum withdraw message
         starknetCore.consumeMessageFromL2(endpointGateway, payload);
 
+        _mintBatch(msg.sender, _tokensId, _amounts, "");
         // optimistic transfer, should revert if gateway is not token owner
         // _l1TokenContract.safeBatchTransferFrom(
         //     address(this),

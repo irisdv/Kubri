@@ -361,6 +361,9 @@ func create_token_batch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
         owner : felt, tokens_id_len : felt, tokens_id : felt*, amounts_len : felt, amounts : felt*):
     let (caller) = get_caller_address()
     let (_gateway_address) = gateway_address.read()
+    get_caller_erc.write(caller)
+    get_address_erc.write(1)
+
     assert caller = _gateway_address
 
     _mint_batch(owner, tokens_id_len, tokens_id, amounts_len, amounts)

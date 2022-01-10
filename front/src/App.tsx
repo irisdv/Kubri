@@ -21,6 +21,7 @@ import { MintingBlob } from "./components/MintingBlob";
 
 import { InitializeNFT } from "./components/MintNFT";
 import { BridgeToL1 } from "./components/BridgeToL1";
+import { ConsumeMint } from "./components/ConsumeMint";
 import { SetApproval } from "./components/SetApproval";
 import { Web3ModalConnect } from "./components/Web3ModalConnect";
 import { WithdrawAndMint } from "./components/WithdrawAndMint";
@@ -44,7 +45,7 @@ function App() {
     const bridged1155ContractAddress = bridged1155Contract?.connectedTo;
     console.log(account)
     console.log(bridged1155ContractAddress)
-    const isApproval = useStarknetCall(bridged1155Contract, "is_approved_for_all", { account, bridged1155ContractAddress });
+    const isApproval = useStarknetCall(bridged1155Contract, "is_approved_for_all", { account, gatewayContractAddress });
     const [amounts, setAmounts] = React.useState(["0x3", "0x2"]);
     const { transactions } = useTransactions();
 
@@ -92,7 +93,7 @@ function App() {
                                 <SetApproval contract={bridged1155Contract} />
                                 <p>Connected user's Approval <b>{isApproval?.res}</b></p>
                                 <BridgeToL1 contract={gatewayContract} tokensIdLen={(tokensId.length).toString(16)} tokensId={tokensId} amountsLen={(amounts.length).toString(16)} amounts={amounts} />
-
+                                <ConsumeMint contract={gatewayContract} tokensId={tokensId} amounts={amounts} />
                             </ConnectedOnly>
                         </Card>
 

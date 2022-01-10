@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
+// import "@openzeppelin/contracts/token/ERC1155/presets/ERC1155PresetMinterPauser.sol";
+import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 
-contract FakeErc1155 is ERC1155Supply {
+contract FakeErc1155 is ERC1155 {
     constructor() ERC1155("Fake ERC1155") {}
 
-    function mint(
+    function mintBatch(
         address _to,
         uint256[] memory _tokensId,
         uint256[] memory _amounts
