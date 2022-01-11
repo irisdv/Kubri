@@ -4,7 +4,7 @@ import { useStarknet } from "../providers/StarknetProvider";
 
 import GATEWAY from "./abi/gateway1155_abi.json";
 
-const GATEWAY_ADDRESS = "0x0170f8fbdd210cf0f0a79714762ec54ffb791d16e2da05a2e42bf941cee4b7e6";
+const GATEWAY_ADDRESS = process.env.REACT_APP_L2_GATEWAY;
 
 /**
  * Load the counter contract.
