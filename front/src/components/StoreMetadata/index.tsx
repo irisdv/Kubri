@@ -9,7 +9,7 @@ import { Contract } from "starknet";
 
 export function StoreMetadata({ contract }: { contract?: Contract }) {
     const [step, setStep] = useState(0);
-    const [errors, setErrors] = useState("");
+    // const [errors, setErrors] = useState({});
 
     const inputArr = [
         {
@@ -33,6 +33,8 @@ export function StoreMetadata({ contract }: { contract?: Contract }) {
     const [formArray, setFormArray] = useState(formArr);
     const [uri, setURI] = useState('');
     const [stored, setStored] = useState(false);
+    const [tokensID, setTokensID] = useState<any[]>([]);
+    const [supply, setSupply] = useState<any[]>([]);
 
     interface TFormArray {
         name?: string;
@@ -186,8 +188,14 @@ export function StoreMetadata({ contract }: { contract?: Contract }) {
         const client = new NFTStorage({ token : process.env.REACT_APP_API_KEY as string });
         const directory = [];
 
+        const tokensIDs = [];
+        const supplyTokens = [];
+
         if (newFile && formArray) {
             for (var id in formArray) {
+
+                tokensIDs.push(id);
+                supplyTokens.push(formArray[id].supply);
 
                 const properties = {};
                 const attributes = formArray[id].attributes;
@@ -209,6 +217,8 @@ export function StoreMetadata({ contract }: { contract?: Contract }) {
                     new File([JSON.stringify(metadata, null, 2)], `${id}`, { type: newFile[id].type })
                 );
             }
+            setTokensID(tokensIDs);
+            setSupply(supplyTokens);
         }
         console.log('directory', directory);
         const pinnedDir = await client.storeDirectory(directory);
@@ -308,10 +318,10 @@ export function StoreMetadata({ contract }: { contract?: Contract }) {
                     <button className="btn btn-primary mr-2" onClick={() => loadNFT()}>Load NFT metadata</button>
                     {/* {urlNFT? <img src={urlNFT} /> : ''}  */}
 
-                    <button className="btn btn-primary mb-3" onClick={() => loadNFT()}>Mint NFT</button>
-                    {/* <ConnectedOnly>
-                        <Mint1155NFT contract={contract} toMint={formArray as TFormArray} />
-                    </ConnectedOnly> */}
+                    {/* <button className="btn btn-primary mb-3" onClick={() => loadNFT()}>Mint NFT</button> */}
+                    <ConnectedOnly>
+                        <Mint1155NFT contract={contract} supply={supply} tokensID={tokensID} uri={uri} />
+                    </ConnectedOnly>
                     <div><button className="btn btn-primary mr-2" onClick={() => loadInfo()}>Load info states</button></div>
                 </div>
 
@@ -330,7 +340,7 @@ export function StoreMetadata({ contract }: { contract?: Contract }) {
 
                     {formArray.map((item, i) => {
                         return (                            
-                            <div className="col-span-1 indicator" key={i}>
+                            <div className="col-span-1 indicator" style={{display: "block", width:"100%"}} key={i}>
                                 {i != 0 ? 
                                     <div className="indicator-item">
                                         <button className="btn btn-circle btn-sm" onClick={(event) => removeForm(event, i)}>
@@ -413,7 +423,7 @@ export function StoreMetadata({ contract }: { contract?: Contract }) {
                                             {item && item.attributes && item.attributes.map((elmts, k) => {
                                                 return (
                                                     <div className="mb-3" key={k} >
-                                                        <input id={'type-'+`${k}`} type="text" placeholder="e.g. Size" className="input input-bordered mr-2" onChange={(event) => updateAttribute(event, i)} />
+                                                        <input id={'type-'+`${k}`} type="text" placeholder="e.g. Size" className="input input-bordered mr-2 w-40" onChange={(event) => updateAttribute(event, i)} />
                                                         <input id={'value-'+`${k}`} type="text" placeholder="e.g. M" className="input input-bordered mr-2" onChange={(event) => updateAttribute(event, i)} />
                                                         <button className="btn btn-square btn-sm" onClick={(event) => removeAttribute(event, i, k)}>
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-4 h-4 stroke-current">   
@@ -426,7 +436,7 @@ export function StoreMetadata({ contract }: { contract?: Contract }) {
                                             <button className="btn btn-accent" onClick={(event) => addAttribute(event, i)}>Add another attribute</button>
                                         </div>
                                     </div>
-                                    {errors ? (
+                                    {/* {errors ? (
                                         <div className="alert alert-error my-2">
                                             <div className="flex-1">
                                                 <svg
@@ -447,7 +457,7 @@ export function StoreMetadata({ contract }: { contract?: Contract }) {
                                         </div>
                                     ) : (
                                         ""
-                                    )}
+                                    )} */}
 
                                     
                                 </div>
