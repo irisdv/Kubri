@@ -43,6 +43,10 @@ struct TokenUri:
 end
 
 @storage_var
+func _next_token_id() -> (res : felt):
+end
+
+@storage_var
 func _uri() -> (res : TokenUri):
 end
 
@@ -81,6 +85,10 @@ func mint_nft_batch_with_uri{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, r
         _set_uri(uri_)
 
         _mint_batch(sender, tokens_id_len, tokens_id, amounts_len, amounts)
+
+        # update _next_token_id
+        let (_mint_id) = _next_token_id.read()
+        _next_token_id.write(_mint_id + 1)
 
         return()
 end
@@ -400,5 +408,12 @@ end
 func get_gateway_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
         res : felt):
     let (res) = gateway_address.read()
+    return (res)
+end
+
+@view
+func get_next_token_id{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
+        res : felt):
+    let (res) = _next_token_id.read()
     return (res)
 end
