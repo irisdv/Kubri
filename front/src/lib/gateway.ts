@@ -4,7 +4,7 @@ import { useStarknet } from "../providers/StarknetProvider";
 
 import GATEWAY from "./abi/gateway1155_abi.json";
 
-const GATEWAY_ADDRESS = "0x02874a331304c40ec096614ba4162c132218adb88f896aa2d3ab9228f996e432";
+const GATEWAY_ADDRESS = "0x01db8f0b2270799daa3af495c6b00c15dbc255be23679370ed710906ef834aeb";
 
 /**
  * Load the counter contract.

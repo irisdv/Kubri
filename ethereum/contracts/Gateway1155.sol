@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "./FakeErc1155.sol";
 import "./IStarknetCore.sol";
+import "./Factory.sol";
 
 contract Gateway1155 is ERC1155 {
     address public initialEndpointGatewaySetter;
@@ -15,14 +16,16 @@ contract Gateway1155 is ERC1155 {
     uint256 constant BRIDGE_MODE_WITHDRAW = 1;
 
     // Bootstrap
-    constructor(address _starknetCore) ERC1155("Gateway ERC1155") {
+    constructor(address _starknetCore, address _owner)
+        ERC1155("Gateway ERC1155")
+    {
         require(
             _starknetCore != address(0),
             "Gateway/invalid-starknet-core-address"
         );
 
         starknetCore = IStarknetCore(_starknetCore);
-        initialEndpointGatewaySetter = msg.sender;
+        initialEndpointGatewaySetter = _owner;
     }
 
     function setEndpointGateway(uint256 _endpointGateway) external {
@@ -32,6 +35,10 @@ contract Gateway1155 is ERC1155 {
         );
         require(endpointGateway == 0, "Gateway/endpoint-gateway-already-set");
         endpointGateway = _endpointGateway;
+    }
+
+    function getinitialEndpointGatewaySetter() external returns (address) {
+        return initialEndpointGatewaySetter;
     }
 
     // Utils
