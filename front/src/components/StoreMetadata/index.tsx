@@ -1,13 +1,18 @@
 import React, { useState } from "react";
 import { NFTStorage, File, Blob  } from 'nft.storage';
 import axios from 'axios';
-
 import { UploadFile } from '../UploadFile';
 import { ConnectedOnly } from "../ConnectedOnly";
 import { Mint1155NFT } from "../Mint1155NFT";
 import { Contract } from "starknet";
+import { useStarknetERC1155Manager } from '../../providers/StarknetERC1155Context';
 
 export function StoreMetadata({ contract }: { contract?: Contract }) {
+    const { tokenURI, nextTokenID, mint1155NFT, address } = useStarknetERC1155Manager();
+    console.log('tokenURI', tokenURI);
+    console.log('nextTokenID', nextTokenID);
+    console.log('address', address);
+
     const [step, setStep] = useState(0);
     // const [errors, setErrors] = useState({});
 
@@ -184,13 +189,14 @@ export function StoreMetadata({ contract }: { contract?: Contract }) {
         });
     };
 
-    const storeNFT = async () => {
+    const storeAndMint = async () => {
         const client = new NFTStorage({ token : process.env.REACT_APP_API_KEY as string });
         const directory = [];
 
         const tokensIDs = [];
         const supplyTokens = [];
 
+        // todo : update ipfs directory creation
         if (newFile && formArray) {
             for (var id in formArray) {
 
@@ -228,7 +234,9 @@ export function StoreMetadata({ contract }: { contract?: Contract }) {
         if (pinnedDir) {
             setStored(true);
             setURI(pinnedDir)
-            return pinnedDir;
+            // return pinnedDir;
+            const tx = await mint1155NFT(address, (tokensIDs as any), (supplyTokens as any), pinnedDir);
+            console.log('tx after', tx);
         } else {
             setStored(false);
         }
@@ -314,24 +322,22 @@ export function StoreMetadata({ contract }: { contract?: Contract }) {
             <div className="p-5">
                 <h2 className="title text-3xl mb-1 mx-auto text-center font-bold text-purple-700">Create collectibles on Starknet</h2>
                 <div>
-                    <button className="btn btn-primary mr-2" onClick={() => storeNFT()}>Store NFT on IPFS</button>
+                <button className="btn btn-primary mr-2" onClick={() => storeAndMint()}>Store and Mint NFT </button>
                     <button className="btn btn-primary mr-2" onClick={() => loadNFT()}>Load NFT metadata</button>
                     {/* {urlNFT? <img src={urlNFT} /> : ''}  */}
 
-                    {/* <button className="btn btn-primary mb-3" onClick={() => loadNFT()}>Mint NFT</button> */}
                     <ConnectedOnly>
                         <Mint1155NFT contract={contract} supply={supply} tokensID={tokensID} uri={uri} />
                     </ConnectedOnly>
                     <div><button className="btn btn-primary mr-2" onClick={() => loadInfo()}>Load info states</button></div>
                 </div>
-
-                {/* <ul className="w-full steps">
-                    <li data-content={step==0 ? "1" : "✓"} className={step==0 ? "step" : "step step-info"}>Create collectibles on Starknet</li>
-                    <li data-content={step<1 ? "2" : "✓"} className={step<1 ? "step" : "step step-info"}>Details</li>
-                    <li data-content={step<2 ? "3" : "✓"} className={step<2 ? "step" : "step step-info"}>Details</li>
-                    <li data-content={step<3 ? "4" : "✓"} className={step<3 ? "step" : "step step-info"}>Upload Image</li>
-                    <li data-content={step<4 ? "5" : "✓"} className={step<4 ? "step" : "step step-info"}>List NFT</li>
-                </ul> */}
+                <p>step : {step}</p>
+                <ul className="w-full steps">
+                    <li data-content={step==0 ? "1" : "✓"} className={step==0 ? "step step-primary" : "step"}>Create collectibles on Starknet</li>
+                    <li data-content={step<1 ? "2" : "✓"} className={step<1 ? "step" : "step step-primary"}>Bridge to L1</li>
+                    <li data-content={step<2 ? "3" : "✓"} className={step<2 ? "step" : "step step-primary"}>Get your NFTs on L1</li>
+                    {/* <li data-content={step<3 ? "4" : "✓"} className={step<3 ? "step" : "step step-info"}>Upload Image</li> */}
+                </ul>
             </div>
 
             {step==0 &&
@@ -481,6 +487,14 @@ export function StoreMetadata({ contract }: { contract?: Contract }) {
                     </div>
 
                 </>}
+                { step==1 &&
+            <>
+                <p>step 2</p>
+            </>}
+            { step==3 &&
+            <>
+                <p>step 3</p>
+            </>}
         </>
     );
 }

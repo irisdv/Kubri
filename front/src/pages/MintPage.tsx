@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-
 import { StoreMetadata } from '../components/StoreMetadata';
-
 import { useBridged1155Contract } from "../lib/bridged1155";
-import { useStarknetCall } from "../lib/hooks";
+
+
+export interface LoginGateProps {
+	EthereumSection: React.FC;
+	StarknetSection: React.FC;
+}
+
+export interface AddressProps {
+	address: string;
+}
 
 export function MintPage() {
 

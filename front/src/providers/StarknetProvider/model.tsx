@@ -1,13 +1,21 @@
 import { defaultProvider, ProviderInterface } from "starknet";
 
 export interface StarknetState {
+  starknet?: any;
   account?: string;
-  connectBrowserWallet: () => void;
   library: ProviderInterface;
+  active: boolean;
+  gateway?: string;
+  enable: () => void;
+	disable: () => void;
 }
 
 export const STARKNET_STATE_INITIAL_STATE: StarknetState = {
-  account: undefined,
-  connectBrowserWallet: () => undefined,
+  starknet: null,
+  account: '',
   library: defaultProvider,
+  active: false,
+	gateway: '',
+	enable: () => { },
+	disable: () => { }
 };

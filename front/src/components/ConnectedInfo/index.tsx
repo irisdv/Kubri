@@ -2,7 +2,7 @@ import React from "react";
 import { useStarknet } from "../../providers/StarknetProvider";
 
 export function ConnectedInfo() {
-    const { account, connectBrowserWallet } = useStarknet();
+    const { account, enable } = useStarknet();
     const truncated = (account as string).substring(0, 8);
 
     return (

@@ -6,16 +6,16 @@ interface ConnectedOnlyProps {
 }
 
 export function ConnectedOnly({ children }: ConnectedOnlyProps): JSX.Element {
-  const { account, connectBrowserWallet } = useStarknet();
+  const { account, enable } = useStarknet();
 
-  console.log('account component in ConnectedOnly', account);
+  // console.log('account component in ConnectedOnly', account);
 
   if (!account) {
     return (
         <div style={{padding : '10px', justifyContent: 'center'}}>
           <button 
             className="btn btn-primary" 
-            onClick={() => connectBrowserWallet()}
+            onClick={() => enable()}
           >Connect ArgentX Wallet</button>
         </div>
     );
