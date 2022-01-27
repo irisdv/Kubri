@@ -34,40 +34,16 @@ end
 func get_address_erc() -> (res : felt):
 end
 
-struct BlockchainNamespace:
-    member a : felt
-end
-
-# ChainID. Chain Agnostic specifies that the length can go up to 32 nines (i.e. 9999999....) but we will only support 31 nines.
-struct BlockchainReference:
-    member a : felt
-end
-
-struct AssetNamespace:
-    member a : felt
-end
-
-# Contract Address on L1. An address is represented using 20 bytes. Those bytes are written in the `felt`.
-struct AssetReference:
-    member a : felt
+@storage_var
+func _next_token_id() -> (res : felt):
 end
 
 # ERC1155 returns the same URI for all token types.
-# TokenId will be represented by the substring '{id}' and so stored in a felt
+# We use struct as felt can only store string whose length is at most 31 characters
 # Client calling the function must replace the '{id}' substring with the actual token type ID
-struct TokenId:
-    member a : felt
-end
-
-# As defined by Chain Agnostics (CAIP-29 and CAIP-19):
-# {blockchain_namespace}:{blockchain_reference}/{asset_namespace}:{asset_reference}/{token_id}
-# tokenId will be represented by the substring '{id}'
 struct TokenUri:
-    member blockchain_namespace : BlockchainNamespace
-    member blockchain_reference : BlockchainReference
-    member asset_namespace : AssetNamespace
-    member asset_reference : AssetReference
-    member token_id : TokenId
+    member a : felt
+    member b : felt
 end
 
 @storage_var
@@ -128,6 +104,22 @@ func initialize_nft_batch{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, rang
     minted.write(1)
 
     return ()
+end
+
+@external
+func mint_nft_batch_with_uri{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
+        tokens_id_len : felt, tokens_id : felt*, amounts_len : felt, amounts : felt*, uri_: TokenUri):
+        let (sender) = get_caller_address()
+
+        _set_uri(uri_)
+
+        _mint_batch(sender, tokens_id_len, tokens_id, amounts_len, amounts)
+
+        # update _next_token_id
+        let (_mint_id) = _next_token_id.read()
+        _next_token_id.write(_mint_id + 1)
+
+        return()
 end
 
 func _mint{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
@@ -419,5 +411,12 @@ end
 func get_gateway_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
         res : felt):
     let (res) = gateway_address.read()
+    return (res)
+end
+
+@view
+func get_next_token_id{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
+        res : felt):
+    let (res) = _next_token_id.read()
     return (res)
 end

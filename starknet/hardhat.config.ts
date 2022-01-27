@@ -5,7 +5,7 @@ import "@shardlabs/starknet-hardhat-plugin";
  */
 module.exports = {
   cairo: {
-    version: "0.6.2"
+    version: "0.7.0"
   },
   networks: {
     devnet: {
@@ -13,7 +13,7 @@ module.exports = {
     }
   },
   mocha: {
-    starknetNetwork: "devnet"
-    // starknetNetwork: "alpha"
+    // starknetNetwork: "devnet"
+    starknetNetwork: "alpha"
   }
 };
