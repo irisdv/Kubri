@@ -28,7 +28,7 @@ export function ConsumeMint({ contract, tokensId, amounts }: { contract?: Contra
         <Row style={{ padding: '10px', justifyContent: 'center' }}>
             <Button
                 type="primary"
-                onClick={() => consume_mint_credit && consume_mint_credit({ _l1_token_address: l1TokenAddress, _l2_token_address: l2TokenAddress, _tokens_id: ["0x01", "0x02"], _amounts: ["0x03", "0x02"], _l2_owner: account })}
+                onClick={() => consume_mint_credit && consume_mint_credit({ _l1_token_address: l1TokenAddress, _l2_token_address: l2TokenAddress, _tokens_id: ["0x01", "0x02"], _amounts: ["0x70", "0x40"], _l2_owner: account })}
                 style={{ backgroundColor: '#002766', borderColor: '#002766' }}
             >Consume Mint Credit</Button>
         </Row>

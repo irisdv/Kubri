@@ -54,7 +54,8 @@ async def l2_erc1155(
         source=ERC1155_FILE,
         constructor_calldata=[
             l2_bridge.contract_address,
-            L1_TOKEN_ADDRESS
+            L1_TOKEN_ADDRESS,
+            100
         ],
     )
 
@@ -84,12 +85,12 @@ async def test_bridge_to_l1(
     l2_erc1155: StarknetContract,
     auth_user: StarknetContract
 ):
-    await l2_erc1155.initialize_batch([1,2], [50, 100]).invoke(auth_user.contract_address)
+    await l2_erc1155.initialize_nft_batch(auth_user.contract_address,[1, 2, 2, 1, 5], [10, 11, 3, 2, 22]).invoke()
     execution_info = await l2_erc1155.balance_of(auth_user.contract_address, 1).call()
-    assert execution_info.result == (50,)
+    assert execution_info.result == (12,)
 
     execution_info = await l2_erc1155.balance_of(auth_user.contract_address, 2).call()
-    assert execution_info.result == (100,)
+    assert execution_info.result == (14,)
 
     assert (await l2_erc1155.get_gateway_address().call()).result == (l2_bridge.contract_address,)
 
@@ -98,18 +99,25 @@ async def test_bridge_to_l1(
     await l2_erc1155.set_approval_for_all(l2_bridge.contract_address, 1).invoke(auth_user.contract_address)
     assert (await l2_erc1155.is_approved_for_all(auth_user.contract_address, l2_bridge.contract_address).call()).result == (1,)
 
-    assert (await l2_bridge.read_custody_l2(l2_erc1155.contract_address, [1,2], [50, 100]).call()).result == (0,)
-    # test bridge to mainnet function 
-    payload, ib = await l2_bridge.bridge_to_mainnet(L1_TOKEN_ADDRESS,l2_erc1155.contract_address, [1,2], [50,100], L1_OWNER).invoke(auth_user.contract_address)
-    
-    print(ib)
-    # check NFTs bridged are in custody in storage_var
-    assert (await l2_bridge.get_custody_l2(l2_erc1155.contract_address, 1, 50).call()).result == (L1_TOKEN_ADDRESS,)
-    assert (await l2_bridge.get_custody_l2(l2_erc1155.contract_address, 2, 100).call()).result == (L1_TOKEN_ADDRESS,)
+    assert (await l2_bridge.read_custody_l2(l2_erc1155.contract_address, [1, 2, 2, 1, 5], [10, 11, 3, 2, 22]).call()).result == (0,)
 
-    # check NFTs have been burnt 
-    assert (await l2_erc1155.balance_of(auth_user.contract_address, 1).call()).result == (0,)
-    assert (await l2_erc1155.balance_of(auth_user.contract_address, 2).call()).result == (0,)
+    array = await l2_erc1155.get_all_token_by_owner(auth_user.contract_address).call()
+
+    print(array)
+    # # test bridge to mainnet function 
+    await l2_bridge.bridge_to_mainnet(L1_TOKEN_ADDRESS,l2_erc1155.contract_address, [1, 2, 2, 1], [10, 11, 3, 2], L1_OWNER).invoke(auth_user.contract_address)
+    
+    array = await l2_erc1155.get_all_token_by_owner(auth_user.contract_address).call()
+
+    print(array)
+    # print(ib)
+    # check NFTs bridged are in custody in storage_var
+    # assert (await l2_bridge.get_custody_l2(l2_erc1155.contract_address, 1, 50).call()).result == (L1_TOKEN_ADDRESS,)
+    # assert (await l2_bridge.get_custody_l2(l2_erc1155.contract_address, 2, 100).call()).result == (L1_TOKEN_ADDRESS,)
+
+    # # check NFTs have been burnt 
+    # assert (await l2_erc1155.balance_of(auth_user.contract_address, 1).call()).result == (0,)
+    # assert (await l2_erc1155.balance_of(auth_user.contract_address, 2).call()).result == (0,)
 
 
 # @pytest.mark.asyncio

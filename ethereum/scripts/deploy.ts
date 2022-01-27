@@ -19,15 +19,18 @@ async function main() {
 
   // We get the contract to deploy
 
-  const FakeErc1155 = await ethers.getContractFactory("FakeErc1155");
-  const fakeErc1155 = await FakeErc1155.deploy();
-  await fakeErc1155.deployed();
-  console.log("FakeErc1155:", fakeErc1155.address);
+  // const FakeErc1155 = await ethers.getContractFactory("FakeErc1155");
+  // const fakeErc1155 = await FakeErc1155.deploy();
+  // await fakeErc1155.deployed();
+  // console.log("FakeErc1155:", fakeErc1155.address);
 
   const Gateway = await ethers.getContractFactory("Gateway1155");
   const gateway = await Gateway.deploy(L1_STARKNET_CORE);
   await gateway.deployed();
   console.log("Gateway1155:", gateway.address);
+  const bytecode = await gateway.getBytecode();
+  const AddressTMP = await gateway.getAddress(bytecode, 0x123456788);
+  console.log("ComputeAddress =", AddressTMP);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

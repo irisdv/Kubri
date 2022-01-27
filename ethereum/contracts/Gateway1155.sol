@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import "./BridgeErc1155.sol";
 import "./FakeErc1155.sol";
 import "./IStarknetCore.sol";
 import "./Factory.sol";
 
-contract Gateway1155 is ERC1155 {
+contract Gateway1155 {
     address public initialEndpointGatewaySetter;
     uint256 public endpointGateway;
     IStarknetCore public starknetCore;
@@ -16,16 +16,48 @@ contract Gateway1155 is ERC1155 {
     uint256 constant BRIDGE_MODE_WITHDRAW = 1;
 
     // Bootstrap
-    constructor(address _starknetCore, address _owner)
-        ERC1155("Gateway ERC1155")
-    {
+    constructor(address _starknetCore) {
         require(
             _starknetCore != address(0),
             "Gateway/invalid-starknet-core-address"
         );
 
         starknetCore = IStarknetCore(_starknetCore);
-        initialEndpointGatewaySetter = _owner;
+        initialEndpointGatewaySetter = msg.sender;
+    }
+
+    struct NFTIdAmounts {
+        uint256[] _tokensId;
+        uint256[] _amounts;
+    }
+
+    mapping(address => address) private _listeBridgeContract;
+    mapping(address => mapping(uint256 => uint256))
+        private _listeTokensIDAmount;
+    event Deployed(address addr, uint256 salt);
+
+    modifier checkIdAndAmount(
+        uint256[] memory _tokensId,
+        uint256[] memory _amounts
+    ) {
+        require(
+            _tokensId.length == _amounts.length,
+            "The Size of array tokenID and array amounts should be the same"
+        );
+        for (uint256 i = 0; i < _tokensId.length; i++) {
+            uint256 id = _tokensId[i];
+            uint256 amounts = _amounts[i];
+            require(
+                _listeTokensIDAmount[msg.sender][id] > 0,
+                "You can not mint if you don't have amount for a given tokenID"
+            );
+            require(
+                _listeTokensIDAmount[msg.sender][id] >= amounts,
+                "token Id does not exist or wrong amount"
+            );
+            i++;
+        }
+        _;
     }
 
     function setEndpointGateway(uint256 _endpointGateway) external {
@@ -35,10 +67,6 @@ contract Gateway1155 is ERC1155 {
         );
         require(endpointGateway == 0, "Gateway/endpoint-gateway-already-set");
         endpointGateway = _endpointGateway;
-    }
-
-    function getinitialEndpointGatewaySetter() external returns (address) {
-        return initialEndpointGatewaySetter;
     }
 
     // Utils
@@ -131,43 +159,43 @@ contract Gateway1155 is ERC1155 {
         return starknetCore.l2ToL1Messages(msgHash) > 0;
     }
 
-    function debug_bridgeFromStarknetAvailable(
-        ERC1155 _l1TokenContract,
-        uint256 _l2TokenContract,
-        uint256[] memory _tokensId,
-        uint256[] memory _amounts
-    ) external view returns (bytes32) {
-        uint256 size = 4 + (_tokensId.length * 2);
-        uint256 index = 0;
-        uint256[] memory payload = new uint256[](size);
-        // build withdraw message payload
-        payload[0] = BRIDGE_MODE_WITHDRAW;
-        payload[1] = addressToUint(msg.sender);
-        payload[2] = addressToUint(address(_l1TokenContract));
-        payload[3] = _l2TokenContract;
+    // function debug_bridgeFromStarknetAvailable(
+    //     ERC1155 _l1TokenContract,
+    //     uint256 _l2TokenContract,
+    //     uint256[] memory _tokensId,
+    //     uint256[] memory _amounts
+    // ) external view returns (bytes32) {
+    //     uint256 size = 4 + (_tokensId.length * 2);
+    //     uint256 index = 0;
+    //     uint256[] memory payload = new uint256[](size);
+    //     // build withdraw message payload
+    //     payload[0] = BRIDGE_MODE_WITHDRAW;
+    //     payload[1] = addressToUint(msg.sender);
+    //     payload[2] = addressToUint(address(_l1TokenContract));
+    //     payload[3] = _l2TokenContract;
 
-        for (uint256 i = 4; i < size; i++) {
-            require(
-                index < _tokensId.length,
-                "You can not access to that element"
-            );
-            payload[i] = _tokensId[index];
-            i++;
-            payload[i] = _amounts[index];
-            index++;
-        }
+    //     for (uint256 i = 4; i < size; i++) {
+    //         require(
+    //             index < _tokensId.length,
+    //             "You can not access to that element"
+    //         );
+    //         payload[i] = _tokensId[index];
+    //         i++;
+    //         payload[i] = _amounts[index];
+    //         index++;
+    //     }
 
-        bytes32 msgHash = keccak256(
-            abi.encodePacked(
-                endpointGateway,
-                addressToUint(address(this)),
-                payload.length,
-                payload
-            )
-        );
+    //     bytes32 msgHash = keccak256(
+    //         abi.encodePacked(
+    //             endpointGateway,
+    //             addressToUint(address(this)),
+    //             payload.length,
+    //             payload
+    //         )
+    //     );
 
-        return msgHash;
-    }
+    //     return msgHash;
+    // }
 
     // Bridging back from Starknet
     function bridgeFromStarknet(
@@ -204,138 +232,81 @@ contract Gateway1155 is ERC1155 {
         // consum withdraw message
         starknetCore.consumeMessageFromL2(endpointGateway, payload);
 
-        _mintBatch(msg.sender, _tokensId, _amounts, "");
-        // optimistic transfer, should revert if gateway is not token owner
-        // _l1TokenContract.safeBatchTransferFrom(
-        //     address(this),
-        //     msg.sender,
-        //     _tokensId,
-        //     _amounts
-        // );
-        // _l1TokenContract.satransferFrom(address(this), msg.sender, _tokenId);
+        bytes memory bytecode = this.getBytecode();
+        address newContractAdd = this.getAddress(bytecode, 0x123456788);
+        if (_listeBridgeContract[msg.sender] != newContractAdd) {
+            address deployBridgeAdd = deploy(bytecode, 0x123456788);
+            require(
+                deployBridgeAdd == newContractAdd,
+                "Address deployed is not the same than the predicted one"
+            );
+            _listeBridgeContract[msg.sender] = newContractAdd;
+        }
+        for (uint256 i = 0; i < _tokensId.length; i++) {
+            _listeTokensIDAmount[msg.sender][_tokensId[i]] += _amounts[i];
+            i++;
+        }
     }
 
-    // Bridging native token from Starknet
-    // function withdrawAndMint(
-    //     // IERC721 _l1TokenContract, --> car il sera extract du AssetType
-    //     uint256 _l2TokenContract,
-    //     uint256 assetType,
-    //     bytes calldata mintingBlob
-    // ) external {
-    //     uint256[] memory payload = new uint256[](5);
+    function mintNFTFromStarknet(
+        uint256[] memory _tokensId,
+        uint256[] memory _amounts
+    ) external checkIdAndAmount(_tokensId, _amounts) {
+        require(
+            _listeBridgeContract[msg.sender] != address(0),
+            "Bridge contract address can not be zero"
+        );
+        address bridgeAddress = _listeBridgeContract[msg.sender];
+        BridgeErc1155 bridge = BridgeErc1155(bridgeAddress);
+        bridge.mintNFT(msg.sender, _tokensId, _amounts);
+        for (uint256 i = 0; i < _tokensId.length; i++) {
+            _listeTokensIDAmount[msg.sender][_tokensId[i]] -= _amounts[i];
+            i++;
+        }
+    }
 
-    //     bytes memory assetInfo = getAssetInfo(assetType);
+    // 1. Get bytecode of contract to be deployed
+    function getBytecode() external view returns (bytes memory) {
+        bytes memory bytecode = type(BridgeErc1155).creationCode;
 
-    //     // check que l'AssetType est bien le bon ?
+        return abi.encodePacked(bytecode, abi.encode(address(this)));
+    }
 
-    //     // extract _l1TokenContract address from AssetType
-    //     // get _tokenId from mintingBlob
+    // 2. Compute the address of the contract to be deployed
+    function getAddress(bytes memory bytecode, uint256 _salt)
+        external
+        view
+        returns (address)
+    {
+        bytes32 hash = keccak256(
+            abi.encodePacked(
+                bytes1(0xff),
+                address(this),
+                _salt,
+                keccak256(bytecode)
+            )
+        );
 
-    //     // build withdraw message payload
-    //     payload[0] = BRIDGE_MODE_WITHDRAW;
-    //     payload[1] = addressToUint(msg.sender);
-    //     payload[2] = addressToUint(address(_l1TokenContract));
-    //     payload[3] = _l2TokenContract;
-    //     payload[4] = _tokenId;
+        return address(uint160(uint256(hash)));
+    }
 
-    //     // Since any L2 contract can send messages to any L1 contract it is recommended
-    //     // that the L1 contract check the “from” address before processing the transaction.
+    // 3. Deploy the contract
+    function deploy(bytes memory bytecode, uint256 _salt)
+        public
+        payable
+        returns (address)
+    {
+        address addr;
 
-    //     // consum withdraw message
-    //     starknetCore.consumeMessageFromL2(endpointGateway, payload);
+        assembly {
+            addr := create2(0, add(bytecode, 0x20), mload(bytecode), _salt)
 
-    //     // optimistic transfer, should revert if gateway is not token owner
-    //     // _l1TokenContract.transferFrom(address(this), msg.sender, _tokenId);
+            if iszero(extcodesize(addr)) {
+                revert(0, 0)
+            }
+        }
 
-    //     // Mint token avec :
-    //     // amount (récupéré de getQuantitizedAmount),
-    //     // owner = msg.sender
-    //     // mintingBlob
-    // }
-
-    // function calculateMintableAssetId(
-    //     uint256 assetType,
-    //     bytes memory mintingBlob
-    // ) internal pure returns (uint256 assetId) {
-    //     uint256 blobHash = uint256(keccak256(mintingBlob));
-    //     assetId =
-    //         (uint256(
-    //             keccak256(
-    //                 abi.encodePacked(MINTABLE_PREFIX, assetType, blobHash)
-    //             )
-    //         ) & MASK_240) |
-    //         MINTABLE_ASSET_ID_FLAG;
-    // }
-
-    // function getAssetInfo(uint256 assetType)
-    //     public
-    //     view
-    //     returns (bytes memory assetInfo)
-    // {
-    //     // Verify that the registration is set and valid.
-    //     require(registeredAssetType[assetType], "ASSET_TYPE_NOT_REGISTERED");
-
-    //     // Retrieve registration.
-    //     assetInfo = assetTypeToAssetInfo[assetType];
-    // }
-
-    // function isEther(uint256 assetType) internal view returns (bool) {
-    //     return extractTokenSelector(getAssetInfo(assetType)) == ETH_SELECTOR;
-    // }
-
-    // function isMintableAssetType(uint256 assetType)
-    //     internal
-    //     view
-    //     returns (bool)
-    // {
-    //     bytes4 tokenSelector = extractTokenSelector(getAssetInfo(assetType));
-    //     return
-    //         tokenSelector == MINTABLE_ERC20_SELECTOR ||
-    //         tokenSelector == MINTABLE_ERC721_SELECTOR;
-    // }
-
-    // function extractTokenSelector(bytes memory assetInfo)
-    //     internal
-    //     pure
-    //     returns (bytes4 selector)
-    // {
-    //     // solium-disable-next-line security/no-inline-assembly
-    //     assembly {
-    //         selector := and(
-    //             0xffffffff00000000000000000000000000000000000000000000000000000000,
-    //             mload(add(assetInfo, SELECTOR_OFFSET))
-    //         )
-    //     }
-    // }
+        emit Deployed(addr, _salt);
+        return addr;
+    }
 }
-
-/*
-https://github.com/starkware-libs/starkex-resources/blob/44a15c7d1bdafda15766ea0fc2e0866e970e39c1/crypto/starkware/crypto/signature/asset.js#L171
-
-AssetType == 
-        - quantum (coeff de multiplication de L2 vers L1) -->  uint256 constant MAX_QUANTUM = 2**128 - 1;
-        - AssetInfo == bytes4(keccak256("MintableERC721Token(address,uint256)"));`
-            De AssetInfo je peux avoir le TokenSelector "MINTABLE_ERC721_SELECTOR"
-
-| ``uint256 assetType = uint256(keccak256(abi.encodePacked(assetInfo, quantum))) &``
-| ``0x03FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;``
-
-
-TokenSelector = bytes4(keccak256("MintableERC721Token(address,uint256)"))
-| `ETH_SELECTOR = bytes4(keccak256("ETH()"));`
-   | `ERC20_SELECTOR = bytes4(keccak256("ERC20Token(address)"));`
-   | `ERC721_SELECTOR = bytes4(keccak256("ERC721Token(address,uint256)"));`
-   | `MINTABLE_ERC20_SELECTOR = bytes4(keccak256("MintableERC20Token(address)"));`
-   | `MINTABLE_ERC721_SELECTOR = bytes4(keccak256("MintableERC721Token(address,uint256)"));`
-
-
-TokenSelector == bytes4(keccak256('MintableERC721Token(address,uint256)')) --> 0xb8b86672
-AssetInfo(address) == TokenSelector + bytes.fromhex(address[2:]).rjust(32, b'\0') --> où address est le contract address du token ERC721?
-AssetType = keccak256(asset_info, 1)
-
-AssetId(token_id, address) = keccak256('NFT:', assetType, token_id)
-
-AssetId(minting_blob, address) = keccak256('MINTABLE:', assetType, blob_hash)
-
-Mais à quoi ressemble le minting_blob
-*/

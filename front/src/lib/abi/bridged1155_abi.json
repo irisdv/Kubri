@@ -2,93 +2,18 @@
     {
         "members": [
             {
-                "name": "blockchain_namespace",
+                "name": "a",
                 "offset": 0,
-                "type": "BlockchainNamespace"
+                "type": "felt"
             },
             {
-                "name": "blockchain_reference",
+                "name": "b",
                 "offset": 1,
-                "type": "BlockchainReference"
-            },
-            {
-                "name": "asset_namespace",
-                "offset": 2,
-                "type": "AssetNamespace"
-            },
-            {
-                "name": "asset_reference",
-                "offset": 3,
-                "type": "AssetReference"
-            },
-            {
-                "name": "token_id",
-                "offset": 4,
-                "type": "TokenId"
+                "type": "felt"
             }
         ],
         "name": "TokenUri",
-        "size": 5,
-        "type": "struct"
-    },
-    {
-        "members": [
-            {
-                "name": "a",
-                "offset": 0,
-                "type": "felt"
-            }
-        ],
-        "name": "TokenId",
-        "size": 1,
-        "type": "struct"
-    },
-    {
-        "members": [
-            {
-                "name": "a",
-                "offset": 0,
-                "type": "felt"
-            }
-        ],
-        "name": "AssetNamespace",
-        "size": 1,
-        "type": "struct"
-    },
-    {
-        "members": [
-            {
-                "name": "a",
-                "offset": 0,
-                "type": "felt"
-            }
-        ],
-        "name": "AssetReference",
-        "size": 1,
-        "type": "struct"
-    },
-    {
-        "members": [
-            {
-                "name": "a",
-                "offset": 0,
-                "type": "felt"
-            }
-        ],
-        "name": "BlockchainNamespace",
-        "size": 1,
-        "type": "struct"
-    },
-    {
-        "members": [
-            {
-                "name": "a",
-                "offset": 0,
-                "type": "felt"
-            }
-        ],
-        "name": "BlockchainReference",
-        "size": 1,
+        "size": 2,
         "type": "struct"
     },
     {
@@ -99,6 +24,10 @@
             },
             {
                 "name": "address_l1",
+                "type": "felt"
+            },
+            {
+                "name": "max",
                 "type": "felt"
             }
         ],
@@ -123,9 +52,13 @@
             {
                 "name": "amounts",
                 "type": "felt*"
+            },
+            {
+                "name": "uri_",
+                "type": "TokenUri"
             }
         ],
-        "name": "initialize_batch",
+        "name": "mint_nft_batch_with_uri",
         "outputs": [],
         "type": "function"
     },
@@ -468,6 +401,26 @@
                 "type": "felt"
             }
         ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "owner",
+                "type": "felt"
+            },
+            {
+                "name": "amounts_len",
+                "type": "felt"
+            },
+            {
+                "name": "amounts",
+                "type": "felt*"
+            }
+        ],
+        "name": "write_total_amount",
+        "outputs": [],
         "stateMutability": "view",
         "type": "function"
     }

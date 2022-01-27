@@ -10,7 +10,7 @@ export function InitializeNFT({ contract }: { contract?: Contract }) {
     const { account } = useStarknet();
     const [to, setTo] = React.useState(account);
     const [tokensId, setTokensId] = React.useState(["0x01", "0x02"]);
-    const [amounts, setAmounts] = React.useState(["0x03", "0x02"]);
+    const [amounts, setAmounts] = React.useState(["0x70", "0x40"]);
     const {
         invoke: initialize_nft_batch,
         hash,

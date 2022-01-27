@@ -46,7 +46,7 @@ function App() {
     console.log(account)
     console.log(bridged1155ContractAddress)
     const isApproval = useStarknetCall(bridged1155Contract, "is_approved_for_all", { account, gatewayContractAddress });
-    const [amounts, setAmounts] = React.useState(["0x3", "0x2"]);
+    const [amounts, setAmounts] = React.useState(["0x70", "0x40"]);
     const { transactions } = useTransactions();
 
     return (

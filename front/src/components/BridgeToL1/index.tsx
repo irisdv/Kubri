@@ -29,7 +29,7 @@ export function BridgeToL1({ contract, tokensIdLen, tokensId, amountsLen, amount
         <Row style={{ padding: '10px', justifyContent: 'center' }}>
             <Button
                 type="primary"
-                onClick={() => bridge_to_mainnet && bridge_to_mainnet({ _l1_token_address: l1TokenAddress, _l2_token_address: l2TokenAddress, _tokens_id: ["0x01", "0x02"], _amounts: ["0x03", "0x02"], _l1_owner: l1Owner })}
+                onClick={() => bridge_to_mainnet && bridge_to_mainnet({ _l1_token_address: l1TokenAddress, _l2_token_address: l2TokenAddress, _tokens_id: ["0x01", "0x02"], _amounts: ["0x70", "0x40"], _l1_owner: l1Owner })}
                 style={{ backgroundColor: '#002766', borderColor: '#002766' }}
             >Bridge NFT to L1</Button>
         </Row>
