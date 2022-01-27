@@ -3,8 +3,12 @@ import { Contract, Abi } from "starknet";
 import { useStarknet } from "../providers/StarknetProvider";
 
 import BRIDGED1155 from "./abi/bridged1155_abi.json";
+import StarknetBridged1155 from './abi/bridged1155.summary.json';
 
-const ERC1155_ADDRESS = process.env.REACT_APP_L2_ERC1155;
+const unOddHex = (v: string) => v.length % 2 === 1 ? `0x0${v.slice(2)}` : v;
+const ERC1155_ADDRESS = unOddHex(StarknetBridged1155.address)
+
+console.log('ERC1155_ADDRESS', ERC1155_ADDRESS)
 
 /**
  * Load the counter contract.

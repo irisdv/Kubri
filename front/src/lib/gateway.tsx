@@ -3,8 +3,12 @@ import { Contract, Abi } from "starknet";
 import { useStarknet } from "../providers/StarknetProvider";
 
 import GATEWAY from "./abi/gateway1155_abi.json";
+import StarknetGateway1155 from './abi/gateway1155.summary.json';
 
-const GATEWAY_ADDRESS = process.env.REACT_APP_L2_GATEWAY;
+const unOddHex = (v: string) => v.length % 2 === 1 ? `0x0${v.slice(2)}` : v;
+const GATEWAY_ADDRESS = unOddHex(StarknetGateway1155.address)
+
+console.log('GATEWAY_ADDRESS', GATEWAY_ADDRESS)
 
 /**
  * Load the counter contract.
