@@ -4,7 +4,7 @@ export const FileUploadButton = styled.button`
   box-sizing: border-box;
   appearance: none;
   background-color: transparent;
-  border: 2px solid #3498db;
+  border: 2px solid #9D95CB;
   cursor: pointer;
   font-size: 1rem;
   line-height: 1;
@@ -12,7 +12,7 @@ export const FileUploadButton = styled.button`
   text-align: center;
   font-weight: 700;
   border-radius: 6px;
-  color: #3498db;
+  color: #9D95CB;
   position: relative;
   overflow: hidden;
   z-index: 1;
@@ -31,7 +31,7 @@ export const FileUploadButton = styled.button`
     transform: translateX(-50%);
     width: 0;
     height: 100%;
-    background: #3498db;
+    background: #9D95CB;
     z-index: -1;
     transition: width 250ms ease-in-out;
   }

@@ -1,42 +1,50 @@
 import React from "react";
 import { Contract } from "starknet";
-import { useStarknetInvoke } from "../../lib/hooks";
-import { useStarknet } from "../../providers/StarknetProvider";
-import { useTransaction } from "../../providers/TransactionsProvider";
-import { useStarknetCall } from "../../lib/hooks";
-
-import { Button, Row } from 'antd';
+import { useStarknetERC1155Manager } from '../../providers/StarknetERC1155Context';
+import { useTransactions } from "../../providers/TransactionsProvider";
+// import { useStarknetInvoke } from "../../lib/hooks";
+// import { useStarknet } from "../../providers/StarknetProvider";
+// import { useStarknetCall } from "../../lib/hooks";
 
 export function SetApproval({ contract }: { contract?: Contract }) {
+    const { addTransaction } = useTransactions();
+    const { transactions } = useTransactions();
+    const { address, approveUser, approvalTx, approvedGateway } = useStarknetERC1155Manager();
+    const [approvalState, setApprovalState] = React.useState(0);
 
-    const { account } = useStarknet();
-    const [tokensId, setTokensId] = React.useState(["0x01", "0x02"]);
-    const tokensId1 = tokensId[0];
-    const tokensId2 = tokensId[1];
+    React.useEffect(() => {
+        if (approvalState == 0 && approvedGateway == true) {
+            setApprovalState(2);
+        }
+        if (approvalState==1) {
+            console.log('approval ongoing');
+            var data = transactions.filter((transactions) => (transactions.hash) === approvalTx);
+            console.log('data', data);
+            if (data && data[0] && data[0].code && (data[0].code == 'REJECTED')) {
+                setApprovalState(0)
+            } else if (data && data[0] && (data[0].code == 'ACCEPTED_ON_L1' || data[0].code == 'ACCEPTED_ON_L2')) {
+                console.log('tx pour set approval est bien passée on peut passer au bridge')
+                setApprovalState(2);
+            }
+        }
+      }, [approvalState, transactions, approvalTx, approvedGateway])
 
-    const l1TokenAddress = process.env.REACT_APP_L1_ERC1155
-    const l2TokenAddress = process.env.REACT_APP_L2_ERC1155
-    const l1Owner = process.env.REACT_APP_L1_OWNER
-
-    const {
-        invoke: set_approval_for_all,
-        hash,
-        submitting
-    } = useStarknetInvoke(contract, "set_approval_for_all");
-
-    const transactionStatus = useTransaction(hash);
-
-    if (!account) return null;
+    const approveUserFront = async () => {
+        setApprovalState(1);
+        const tx = await approveUser();
+        // @ts-ignore
+        if (tx && tx.transaction_hash) {
+            // @ts-ignore
+            addTransaction(tx);
+        }
+    }
 
     return (
         <div>
-            <Row style={{ padding: '10px', justifyContent: 'center' }}>
-                <Button
-                    type="primary"
-                    onClick={() => set_approval_for_all && set_approval_for_all({ l2TokenAddress, approved: 1 })}
-                    style={{ backgroundColor: '#002766', borderColor: '#002766' }}
-                >Set Approval for all</Button>
-            </Row>
+            <p>To bridge your NFTs to L1 first you need to set approval for the gateway contract to transfer your NFTs</p>
+            <div className="center-cnt">
+                <button className={approvalState==0 ? "btn btn-accent my-2" : "btn btn-accent my-2 loading"} onClick={() => approveUserFront() }>Set Approval</button>
+            </div>
         </div>
     );
 }

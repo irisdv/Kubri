@@ -14,7 +14,7 @@ export function ConnectedOnly({ children }: ConnectedOnlyProps): JSX.Element {
     return (
         <div style={{padding : '10px', justifyContent: 'center'}}>
           <button 
-            className="btn btn-primary" 
+            className="btn btn-accent" 
             onClick={() => enable()}
           >Connect ArgentX Wallet</button>
         </div>
