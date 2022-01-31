@@ -236,29 +236,5 @@
         ],
         "stateMutability": "view",
         "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "get_tmp_adderc",
-        "outputs": [
-            {
-                "name": "address",
-                "type": "felt"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "get_tmp_from",
-        "outputs": [
-            {
-                "name": "address",
-                "type": "felt"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
     }
 ]

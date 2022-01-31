@@ -7,33 +7,34 @@ export function HeaderSite() {
 
     return (
         <>
-            <div className="navbar mb-2 shadow-lg bg-neutral text-neutral-content rounded-box">
+            <div className="navbar mb-2 shadow-lg bg-primary text-neutral-content">
                 <div className="px-2 mx-2 navbar-start">
-                    <span className="text-lg font-bold">
-                        Mekhenty
+                    <span className="text-3xl font-bold">
+                        KUBRI
                     </span>
                 </div>
                 <div className="hidden px-2 mx-2 navbar-center lg:flex">
                     <div className="flex items-stretch">
-                        <nav>
-                            <NavLink to='/' className="btn btn-ghost btn-sm rounded-btn nav-link" activeClassName="active">Home</NavLink>
+                        <p className="text-xl">Mint & bridge ERC1155 NFTs from Starknet to Ethereum</p>
+                        {/* <nav>
+                            <NavLink to='/' className="btn btn-ghost btn-sm rounded-btn nav-link text-lg" activeClassName="active">Home</NavLink>
                         </nav>
 
                         <nav>
-                            <NavLink to='/mint' className="btn btn-ghost btn-sm rounded-btn nav-link" activeClassName="active">Mint ERC1155 NFT</NavLink>
-                        </nav>
+                            <NavLink to='/mint' className="btn btn-ghost btn-sm rounded-btn nav-link text-lg" activeClassName="active">Mint ERC1155 NFT</NavLink>
+                        </nav> */}
                     </div>
                 </div>
-                {/* <div className="navbar-end">
+                <div className="navbar-end">
                     <ConnectedOnly>
                         <ConnectedInfo />
                     </ConnectedOnly>
-                </div> */}
-                <div className="navbar-end">
+                </div>
+                {/* <div className="navbar-end">
                     <ConnectedWallet>
                         <ConnectedInfo />
                     </ConnectedWallet>
-                </div>
+                </div> */}
             </div>
         </>
     );

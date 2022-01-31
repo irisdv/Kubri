@@ -1,19 +1,41 @@
 import React, { useState } from "react";
 import { NFTStorage, File, Blob  } from 'nft.storage';
-import axios from 'axios';
 import { UploadFile } from '../UploadFile';
 import { ConnectedOnly } from "../ConnectedOnly";
-import { Mint1155NFT } from "../Mint1155NFT";
 import { Contract } from "starknet";
 import { useStarknetERC1155Manager } from '../../providers/StarknetERC1155Context';
+import { useTransaction, useTransactions } from "../../providers/TransactionsProvider";
+import { VoyagerLink } from "../VoyagerLink";
+import { useStarknetInvoke, useStarknetCall } from "../../lib/hooks";
+// import { useStarknet } from "../../providers/StarknetProvider";
+import { SetApproval } from "../SetApproval";
+import { ListOwnedTokens } from "../ListOwnedTokens";
+import { stark, shortString, number } from 'starknet';
+const { hexToDecimalString } = number;
+// const { decodeShortString, encodeShortString } = shortString;
+
 
 export function StoreMetadata({ contract }: { contract?: Contract }) {
-    const { tokenURI, nextTokenID, mint1155NFT, address } = useStarknetERC1155Manager();
-    console.log('tokenURI', tokenURI);
-    console.log('nextTokenID', nextTokenID);
-    console.log('address', address);
+    const { addTransaction } = useTransactions();
+    const { nextTokenID, address, ownedTokens, mint1155NFT, approvedGateway, bridgeToL1 } = useStarknetERC1155Manager();
+    // const { account, gateway } = useStarknet();
+    console.log('nextTokenID front', nextTokenID);
+    console.log('ownedTokens from context', ownedTokens);
+
+    const {
+        invoke: mint_nft_batch_with_uri,
+        hash,
+        submitting
+    } = useStarknetInvoke(contract, "mint_nft_batch_with_uri");
+    const transactionStatus = useTransaction(hash);
+    const { transactions } = useTransactions();
+    // console.log('submitting', submitting);
+    // console.log('transactionStatus', transactionStatus);
+    console.log('transactions', transactions);
 
     const [step, setStep] = useState(0);
+    const [minted, setMinted] = useState(0);
+    const [bridgeState, setBridgeState] = useState(0);
     // const [errors, setErrors] = useState({});
 
     const inputArr = [
@@ -31,15 +53,21 @@ export function StoreMetadata({ contract }: { contract?: Contract }) {
           image: "",
           imgHeight: 0,
           imgWidth: 0,
-          attributes: attributeArray
+          attributes: attributeArray,
+          imgType: "",
+          imgName: "",
+          uri: ""
         }
       ];
     const [newFile, setNewFile] = useState<File[]>([])
     const [formArray, setFormArray] = useState(formArr);
+    // const [uri, setURI] = useState<string[]>([]);
     const [uri, setURI] = useState('');
     const [stored, setStored] = useState(false);
-    const [tokensID, setTokensID] = useState<any[]>([]);
-    const [supply, setSupply] = useState<any[]>([]);
+    const [tokensID, setTokensID] = useState<number[]>([]);
+    const [supply, setSupply] = useState<number[]>([]);
+
+    console.log('formArray', formArray);
 
     interface TFormArray {
         name?: string;
@@ -169,6 +197,8 @@ export function StoreMetadata({ contract }: { contract?: Contract }) {
                 newForm[formID].imgHeight = objectImage.height;
                 newForm[formID].imgWidth = objectImage.width;
                 newForm[formID].image = URL.createObjectURL(files);
+                newForm[formID].imgType = files.type;
+                newForm[formID].imgName = files.name;
                 return newForm; 
             });
         }
@@ -190,18 +220,22 @@ export function StoreMetadata({ contract }: { contract?: Contract }) {
     };
 
     const storeAndMint = async () => {
+        setMinted(1);
         const client = new NFTStorage({ token : process.env.REACT_APP_API_KEY as string });
+
+        const tokensIDs : number[] = [];
+        const supplyTokens : number[] = [];
+        // const listURIs : string[] = [];
         const directory = [];
+        const nextID = parseInt(hexToDecimalString(nextTokenID));
 
-        const tokensIDs = [];
-        const supplyTokens = [];
+        console.log('newFile', newFile);
 
-        // todo : update ipfs directory creation
         if (newFile && formArray) {
             for (var id in formArray) {
 
-                tokensIDs.push(id);
-                supplyTokens.push(formArray[id].supply);
+                tokensIDs.push(parseInt(id)+nextID);
+                supplyTokens.push(parseInt(formArray[id].supply));
 
                 const properties = {};
                 const attributes = formArray[id].attributes;
@@ -211,53 +245,99 @@ export function StoreMetadata({ contract }: { contract?: Contract }) {
                     const newAttr = { [type] : value };
                     Object.assign(properties, newAttr);
                 }
-
+                // save into IPFS directory
                 const metadata = {
                     name: formArray[id].name,
                     description: formArray[id].description,
                     image: `ipfs://${formArray[id].image}`,
                     properties: properties
                 }
-
                 directory.push(
-                    new File([JSON.stringify(metadata, null, 2)], `${id}`, { type: newFile[id].type })
-                );
+                    new File([JSON.stringify(metadata, null, 2)], `${id+nextID}`, { type: newFile[id].type }) 
+                )
+
+                // const metadata = await client.store({
+                //     name: formArray[id].name,
+                //     description: formArray[id].description,
+                //     image : new File([`ipfs://${formArray[id].image}`], formArray[id].imgName, { type : formArray[id].imgType }),
+                //     properties: properties
+                // })
+                // console.log('metadata for image is', metadata);
+
+                // setFormArray(s => {
+                //     const newForm = s.slice();
+                //     newForm[id].uri = metadata.url;
+                //     return newForm; 
+                // });
+                // listURIs.push(metadata.url);
             }
             setTokensID(tokensIDs);
             setSupply(supplyTokens);
+            // setURI(listURIs);
+            // console.log('listURIs', listURIs);
         }
         console.log('directory', directory);
         const pinnedDir = await client.storeDirectory(directory);
         console.log('pinnedDir', pinnedDir);
-        // pinnedDir = bafybeifvckoqkr7wmk55ttuxg2rytfojrfihiqoj5h5wjt5jtkqwnkxbie
+        const status = await client.status(pinnedDir);
+        console.log('status of IPFS', status);
 
         if (pinnedDir) {
             setStored(true);
-            setURI(pinnedDir)
-            // return pinnedDir;
-            const tx = await mint1155NFT(address, (tokensIDs as any), (supplyTokens as any), pinnedDir);
-            console.log('tx after', tx);
+            setURI(pinnedDir);
+            setMinted(0);
+            // await MintNFT((tokensIDs as []), (supplyTokens as []), pinnedDir);
         } else {
             setStored(false);
+            setMinted(0);
         }
-      }
+        // if (listURIs.length == tokensIDs.length) {
+        //     setStored(true);
+        //     await MintNFT((tokensID as []), (supplyTokens as []));
+        // } else {
+        //     setStored(false);
+        // }
+    }
 
-    const loadNFT = async () => {
-        // console.log("https://ipfs.infura.io/ipfs/" + uri.slice(7))
-        const test = 'https://bafybeibvdisrr4razcg6pc7hrosmqmi6726u3w5da2rzmuaenxs6fcqt4q/0';
-        const testMeta = await axios.get("https://ipfs.infura.io/ipfs/" + test.slice(8))
-        console.log('meta', testMeta);
-        const url = 'https://ipfs.io/ipfs/' + testMeta.data.image.slice(12);
-        // testMeta.data.image = "ipfs://blob:http://localhost:3100/96d8bcf2-37ae-48a1-9efd-b72a5c6e3f22"
+    // React.useEffect(() => {
+    //     if (stored && minted==1 && !submitting) {
+    //       console.log('minted = 1 && pas submitting');
+    //       if (transactionStatus && (transactionStatus.code == 'REJECTED')) {
+    //         setMinted(2)
+    //         console.log('dans if');
+    //       } else if (submitting == false && transactionStatus && (transactionStatus.code == 'ACCEPTED_ON_L1' || transactionStatus.code == 'ACCEPTED_ON_L2')) {
+    //         setStep(1);
+    //         console.log('dans else');
+    //       }
+    //     }
+    //   }, [stored, minted, submitting, transactionStatus])
 
+    const MintNFT = async (tokensID : [], supplyTokens : [], directory : string) => {
+        setMinted(1);
 
-        // const meta = await axios.get("https://ipfs.infura.io/ipfs/" + uri.slice(7))
-        // const url = 'https://ipfs.io/ipfs/' + meta.data.image.slice(7);
-        
-        console.log('url', url)
-        // setMeta(meta.data);
-        // setUrlNFT(url);
-    };
+        console.log('size directory url', directory.length);
+        // if (mint_nft_batch_with_uri) {
+        //     mint_nft_batch_with_uri({ account, tokensID, supplyTokens, encodeShortString(uri_a), encodeShortString(uri_b) });
+        //     console.log('transactionStatus', transactionStatus);
+        //     console.log('transactions', transactions);
+        // }
+        const tx = await mint1155NFT(tokensID, supplyTokens, directory);
+        // @ts-ignore
+        if (tx && tx.transaction_hash) {
+            // @ts-ignore
+            addTransaction(tx);
+        }
+    }
+
+    const bridgeBatchFront = async () => {
+        setBridgeState(1);
+        const tx = await bridgeToL1(tokensID as [], supply as []);
+        // @ts-ignore
+        if (tx && tx.transaction_hash) {
+            // @ts-ignore
+            addTransaction(tx);
+        }
+    }
 
     // Helper functions
     const range = (start: number, stop : number, step : number) => {
@@ -310,36 +390,29 @@ export function StoreMetadata({ contract }: { contract?: Contract }) {
           console.log('no');
         }
       };
-    
-    // function for testing purposes
-    const loadInfo = () => {
-        console.log('state formArray', formArray);
-    }
-
 
     return (
         <>
             <div className="p-5">
-                <h2 className="title text-3xl mb-1 mx-auto text-center font-bold text-purple-700">Create collectibles on Starknet</h2>
-                <div>
-                <button className="btn btn-primary mr-2" onClick={() => storeAndMint()}>Store and Mint NFT </button>
-                    <button className="btn btn-primary mr-2" onClick={() => loadNFT()}>Load NFT metadata</button>
-                    {/* {urlNFT? <img src={urlNFT} /> : ''}  */}
-
-                    <ConnectedOnly>
-                        <Mint1155NFT contract={contract} supply={supply} tokensID={tokensID} uri={uri} />
-                    </ConnectedOnly>
-                    <div><button className="btn btn-primary mr-2" onClick={() => loadInfo()}>Load info states</button></div>
-                </div>
-                <p>step : {step}</p>
+                {step==0 && ownedTokens.length>0 ? 
+                    <>
+                        <div className="alert alert-info background-neutral">
+                            <div className="flex-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="w-6 h-6 mx-2 stroke-current text-primary">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>                          
+                                </svg> 
+                                <label className="text-primary">It seems you already have some test NFTs, bridge them now! <a className="color-accent underline" onClick={() => selectNextHandler()}> Go to next step</a></label>   
+                            </div>
+                        </div>
+                    </>
+                    :''
+                }
                 <ul className="w-full steps">
-                    <li data-content={step==0 ? "1" : "✓"} className={step==0 ? "step step-primary" : "step"}>Create collectibles on Starknet</li>
-                    <li data-content={step<1 ? "2" : "✓"} className={step<1 ? "step" : "step step-primary"}>Bridge to L1</li>
-                    <li data-content={step<2 ? "3" : "✓"} className={step<2 ? "step" : "step step-primary"}>Get your NFTs on L1</li>
-                    {/* <li data-content={step<3 ? "4" : "✓"} className={step<3 ? "step" : "step step-info"}>Upload Image</li> */}
+                    <li data-content={step==0 ? "1" : "✓"} className={step==0 ? "step" : "step step-accent"}>Create collectibles on Starknet</li>
+                    <li data-content={step<2 ? "2" : "✓"} className={step<1 ? "step" : "step step-accent"}>Bridge to L1</li>
+                    <li data-content={step<3 ? "3" : "✓"} className={step<2 ? "step" : "step step-accent"}>Get your NFTs on L1</li>
                 </ul>
             </div>
-
             {step==0 &&
                 <>
                     <div className="grid grid-cols-2 gap-3 px-10">
@@ -349,7 +422,7 @@ export function StoreMetadata({ contract }: { contract?: Contract }) {
                             <div className="col-span-1 indicator" style={{display: "block", width:"100%"}} key={i}>
                                 {i != 0 ? 
                                     <div className="indicator-item">
-                                        <button className="btn btn-circle btn-sm" onClick={(event) => removeForm(event, i)}>
+                                        <button className="btn btn-circle btn-sm btn-secondary" onClick={(event) => removeForm(event, i)}>
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-4 h-4 stroke-current">   
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>                       
                                             </svg>
@@ -364,7 +437,7 @@ export function StoreMetadata({ contract }: { contract?: Contract }) {
                                             {item && item.image ? 
                                                 <>
                                                 <div className="indicator-item">
-                                                    <button className="btn btn-circle btn-sm" onClick={(event) => removeUploadedFile(event, i)}>
+                                                    <button className="btn btn-circle btn-sm btn-secondary" onClick={(event) => removeUploadedFile(event, i)}>
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-4 h-4 stroke-current">   
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>                       
                                                         </svg>
@@ -431,7 +504,7 @@ export function StoreMetadata({ contract }: { contract?: Contract }) {
                                                     <div className="mb-3" key={k} >
                                                         <input id={'type-'+`${k}`} type="text" placeholder="e.g. Size" className="input input-bordered mr-2 w-40" onChange={(event) => updateAttribute(event, i)} />
                                                         <input id={'value-'+`${k}`} type="text" placeholder="e.g. M" className="input input-bordered mr-2" onChange={(event) => updateAttribute(event, i)} />
-                                                        <button className="btn btn-square btn-sm" onClick={(event) => removeAttribute(event, i, k)}>
+                                                        <button className="btn btn-square btn-sm btn-secondary" onClick={(event) => removeAttribute(event, i, k)}>
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-4 h-4 stroke-current">   
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>                       
                                                         </svg>
@@ -439,7 +512,7 @@ export function StoreMetadata({ contract }: { contract?: Contract }) {
                                                     </div>
                                                 );
                                             })}
-                                            <button className="btn btn-accent" onClick={(event) => addAttribute(event, i)}>Add another attribute</button>
+                                            <button className="btn btn-secondary" onClick={(event) => addAttribute(event, i)}>Add another attribute</button>
                                         </div>
                                     </div>
                                     {/* {errors ? (
@@ -464,8 +537,6 @@ export function StoreMetadata({ contract }: { contract?: Contract }) {
                                     ) : (
                                         ""
                                     )} */}
-
-                                    
                                 </div>
                             </div>
                         );
@@ -473,12 +544,10 @@ export function StoreMetadata({ contract }: { contract?: Contract }) {
 
                     <div className="col-span-1">
                         <div className="card rounded-lg shadow-2xl px-5 py-10">
-                            <p className="text-center">Create another collectible</p>
+                            <p className="text-center text-md">Create another collectible</p>
                             <div className="center-cnt my-2">
-                                <button className="btn btn-square btn-lg" onClick={addForm}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-6 h-6 stroke-current">   
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M24 10h-10v-10h-4v10h-10v4h10v10h4v-10h10z"></path>                       
-                                    </svg>
+                                <button className="btn btn-square btn-lg btn-secondary" onClick={addForm}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" className=""><path d="M24 10h-10v-10h-4v10h-10v4h10v10h4v-10h10z"/></svg>
                                 </button> 
                             </div>
                         </div>
@@ -486,15 +555,115 @@ export function StoreMetadata({ contract }: { contract?: Contract }) {
 
                     </div>
 
+                    <div className="center-cnt py-2">
+                        <ConnectedOnly>
+                            {!stored ? 
+
+                                <button className={minted==0 ? "btn btn-accent mr-2" : "btn btn-accent mr-2 loading"} onClick={() => storeAndMint() }>Store metadata on IPFS </button>
+                            : 
+                                <button className={minted==0 ? "btn btn-accent mr-2" : "btn btn-accent mr-2 loading"} onClick={() => MintNFT(tokensID as [], supply as [], uri) }>Mint your NFTs </button>
+                            }
+                            {/* {minted == 0 || minted == 1 ? 
+                                <button className={minted==0 ? "btn btn-accent mr-2" : "btn btn-accent mr-2 loading"} onClick={() => storeAndMint() }>Store and Mint NFT </button>
+                                : 
+                                <>
+                                    <p>Error while minting, retry minting</p><br/>
+                                    <button className={minted==2 ? "btn btn-accent mr-2" : "btn btn-accent mr-2 loading"} onClick={() => MintNFT(tokensID as [], supply as [], uri) }>Mint your NFTs </button>
+                                </>
+                            } */}
+                        </ConnectedOnly>
+                    </div>
+
                 </>}
                 { step==1 &&
-            <>
-                <p>step 2</p>
+            <> 
+                <div className="grid grid-cols-2 gap-3 px-10">
+                    <div className="card rounded-lg shadow-2xl px-10 py-5 mb-3">
+                        {formArray && tokensID.length > 0 && supply.length > 0 ? 
+                            <> 
+                                {formArray.map((item, i) => { 
+                                    return(
+                                        <div key={i}>
+                                            {item && item.image ? 
+                                                <>
+                                                    <div className="center-cnt">
+                                                        <img src={item.image} height={item.imgHeight} width={item.imgWidth}></img> 
+                                                    </div>
+                                                </>
+                                            : ''}
+                                        </div>
+
+                                    );
+                                })}
+                            </>
+                        
+                            : 
+                            ownedTokens && ownedTokens.length > 0 ?
+                                <>
+                                    <ListOwnedTokens />
+                                </>
+                            :
+                            <p>Oups ! It seems you don't have any tokens to bridge</p>
+                        }
+                    </div>
+                    <div className="card rounded-lg shadow-2xl px-10 py-5 mb-3">
+                        {!approvedGateway ?     
+                        <ConnectedOnly>
+                            <SetApproval />
+                        </ConnectedOnly>
+                        : 
+                         <>
+                            <p>check icon : Gave approval for Gateway.cairo to become operator</p>
+                            <p>You can now bridge your NFTs to L1</p>
+                            <button className={bridgeState==0 ? "btn btn-accent mr-2" : "btn btn-accent mr-2 loading"} onClick={() => bridgeBatchFront() }>Bridge to L1</button>
+                        </>
+                        
+                    }
+                       
+                        {/* {approvalState==0 || approvalState==1 ? 
+                            <>
+                                <div>
+                                    <p>To bridge your NFTs to L1 first you need to set approval for the gateway contract to transfer your NFTs</p>
+                                </div>
+                                <button className={approvalState==0 ? "btn btn-accent mr-2" : "btn btn-accent mr-2 loading"} onClick={() => approveUserFront() }>Set Approval</button>
+                            </>
+                        : 
+                        <>
+                            <p>check icon : Gave approval for Gateway.cairo to become operator</p>
+                            <p>You can now bridge your NFTs to L1</p>
+                            <button className={bridgeState==0 ? "btn btn-accent mr-2" : "btn btn-accent mr-2 loading"} onClick={() => bridgeBatchFront() }>Bridge to L1</button>
+                        </>
+                            
+                        } */}
+                        <ul className="mt-4">
+                            <li><b>Starknet ERC1155 contract:</b> <VoyagerLink.Contract contract={address} /></li>
+                            <li><b>Starknet Gateway contract:</b> <VoyagerLink.Contract contract={address} /></li>
+                            <li><b>Ethereum contract :</b> </li>
+                            {transactions.length>0 ?
+                                <li><b>Transactions:</b>
+                                <ul>
+                                    {transactions.map((tx, idx) => (
+                                        <li key={idx}>
+                                            <VoyagerLink.Transaction transactionHash={tx.hash} />
+                                        </li>
+                                    ))}
+                                </ul>
+                            </li>
+                            : ''
+                            }
+                            
+                        </ul>
+
+                    </div>
+
+                </div>
+
             </>}
             { step==3 &&
             <>
                 <p>step 3</p>
             </>}
+
         </>
     );
 }
