@@ -106,20 +106,37 @@ func initialize_nft_batch{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, rang
     return ()
 end
 
+func create_uri{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
+        tokens_id_len : felt, tokens_id : felt*):
+    if tokens_id_len == 0:
+        return ()
+    end
+
+    let (_mint_id) = _next_token_id.read()
+
+    token_id[0] = _mint_id
+
+    # update _next_token_id
+    _next_token_id.write(_mint_id + 1)
+
+    return create_uri(tokens_id_len=tokens_id_len - 1, tokens_id=tokens_id + 1)
+end
+
 @external
 func mint_nft_batch_with_uri{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-        tokens_id_len : felt, tokens_id : felt*, amounts_len : felt, amounts : felt*, uri_: TokenUri):
-        let (sender) = get_caller_address()
+        tokens_id_len : felt, tokens_id : felt*, amounts_len : felt, amounts : felt*,
+        uri_ : TokenUri):
+    let (sender) = get_caller_address()
 
-        _set_uri(uri_)
+    _set_uri(uri_)
 
-        _mint_batch(sender, tokens_id_len, tokens_id, amounts_len, amounts)
+    _mint_batch(sender, tokens_id_len, tokens_id, amounts_len, amounts)
 
-        # update _next_token_id
-        let (_mint_id) = _next_token_id.read()
-        _next_token_id.write(_mint_id + 1)
+    # update _next_token_id
+    let (_mint_id) = _next_token_id.read()
+    _next_token_id.write(_mint_id + 1)
 
-        return()
+    return ()
 end
 
 func _mint{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
