@@ -40,7 +40,7 @@ export function FrontPage() {
     const isApproval = useStarknetCall(bridged1155Contract, "is_approved_for_all", { account, gatewayContractAddress });
 
 
-    return(
+    return (
         <>
             <div style={{ padding: '30px' }}>
 
@@ -52,7 +52,7 @@ export function FrontPage() {
                             <div className="col-span-3">
                                 <div className="card shadow-lg">
                                     <div className="card-body">
-                                        <h2 className="card-title">Starknet data</h2> 
+                                        <h2 className="card-title">Starknet data</h2>
                                         <ul>
                                             <li><b>Current Block:</b>{" "}
                                                 {blockNumber && <VoyagerLink.Block block={blockNumber} />}
@@ -85,15 +85,15 @@ export function FrontPage() {
                             <div className="col-span-2">
                                 <div className="card shadow-lg">
                                     <div className="card-body">
-                                        <h2 className="card-title">Mint ERC1155 NFT on Starknet</h2> 
+                                        <h2 className="card-title">Mint ERC1155 NFT on Starknet</h2>
                                         {/* <ConnectedOnly> */}
-                                            test
-                                            {/* <p>Balance 1 of user connected is currently <b>{balance1?.res}</b></p> */}
-                                            {/* <p>Balance 2 of user connected is currently <b>{balance2?.res}</b></p> */}
-                                            {/* <InitializeNFT contract={bridged1155Contract} /> */}
-                                            {/* <SetApproval contract={bridged1155Contract} /> */}
-                                            {/* <p>Connected user's Approval <b>{isApproval?.res}</b></p> */}
-                                            {/* <BridgeToL1 contract={gatewayContract} tokensIdLen={tokensId.length} tokensId={tokensId} amountsLen={amounts.length} amounts={amounts} /> */}
+                                        test
+                                        {/* <p>Balance 1 of user connected is currently <b>{balance1?.res}</b></p> */}
+                                        {/* <p>Balance 2 of user connected is currently <b>{balance2?.res}</b></p> */}
+                                        {/* <InitializeNFT contract={bridged1155Contract} /> */}
+                                        {/* <SetApproval contract={bridged1155Contract} /> */}
+                                        {/* <p>Connected user's Approval <b>{isApproval?.res}</b></p> */}
+                                        {/* <BridgeToL1 contract={gatewayContract} tokensIdLen={tokensId.length} tokensId={tokensId} amountsLen={amounts.length} amounts={amounts} /> */}
 
                                         {/* </ConnectedOnly> */}
                                     </div>
@@ -101,7 +101,7 @@ export function FrontPage() {
 
                             </div>
 
-                            </div>
+                        </div>
 
                     </div>
 

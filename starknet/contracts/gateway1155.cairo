@@ -42,14 +42,6 @@ end
 func get_caller_info() -> (res : felt):
 end
 
-@storage_var
-func tmp_get_address_erc() -> (res : felt):
-end
-
-@storage_var
-func tmp_get_from_erc() -> (res : felt):
-end
-
 # keep track of the minted L2 ERC1155 bridged to L1
 @storage_var
 func custody_l2(l2_token_address : felt, token_id : felt, amount : felt) -> (res : felt):
@@ -139,7 +131,6 @@ func bridge_to_mainnet{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
         amounts_len=_amounts_len,
         amounts=_amounts)
     return ()
-    # return (payload_size, message_payload)
 end
 
 @view
@@ -248,21 +239,12 @@ func read_mint_credit{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
         owner=owner)
 end
 
-# @view
-# func get_mint_credit{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-#         _l1_token_address : felt, _token_id : felt, _owner : felt) -> (res : felt):
-#     let (res) = mint_credits.read(
-#         l1_token_address=_l1_token_address, token_id=_token_id, owner=_owner)
-#     return (res)
-# end
-
 # tries to consume mint credit
 @external
 func consume_mint_credit{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         _l1_token_address : felt, _l2_token_address : felt, _tokens_id_len : felt,
         _tokens_id : felt*, _amounts_len : felt, _amounts : felt*, _l2_owner : felt):
     alloc_locals
-    tmp_get_address_erc.write(_l2_owner)
     let (local tmp_l2_token_address : felt) = read_mint_credit(
         l2_token_address=_l2_token_address,
         l1_token_address=_l1_token_address,
@@ -321,7 +303,6 @@ func bridge_from_mainnet{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
         amounts_len=_amounts_len,
         amounts=_amounts)
     assert current_custody_l2 = 0
-    tmp_get_from_erc.write(_owner)
     write_mint_credit(
         l2_token_address=_l2_token_address,
         l1_token_address=_l1_token_address,
@@ -354,18 +335,4 @@ func get_custody_l2{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     let (current_custody) = custody_l2.read(
         l2_token_address=_l2_token_address, token_id=_token_id, amount=_amount)
     return (current_custody)
-end
-
-@view
-func get_tmp_adderc{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
-        address : felt):
-    let (address) = tmp_get_address_erc.read()
-    return (address)
-end
-
-@view
-func get_tmp_from{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
-        address : felt):
-    let (address) = tmp_get_from_erc.read()
-    return (address)
 end

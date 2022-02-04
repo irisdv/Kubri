@@ -3,7 +3,8 @@
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
-from starkware.cairo.common.math import assert_nn_le, assert_not_equal, assert_not_zero, assert_le
+from starkware.cairo.common.math import (
+    assert_nn_le, assert_not_equal, assert_not_zero, assert_le, assert_lt)
 from starkware.cairo.common.alloc import alloc
 
 @storage_var
@@ -27,11 +28,23 @@ func gateway_address() -> (res : felt):
 end
 
 @storage_var
-func get_caller_erc() -> (res : felt):
+func max_mint() -> (res : felt):
 end
 
 @storage_var
-func get_address_erc() -> (res : felt):
+func _amount_minted(owner : felt) -> (res : felt):
+end
+
+@storage_var
+func total_amount(owner : felt) -> (res : felt):
+end
+
+@storage_var
+func total_tokensId(owner : felt) -> (res : felt):
+end
+
+@storage_var
+func get_tokenId(owner : felt, index : felt) -> (res : felt):
 end
 
 @storage_var
@@ -56,14 +69,16 @@ end
 
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        _gateway_address : felt, address_l1 : felt):
+        _gateway_address : felt, address_l1 : felt, max : felt):
     let (_initialized) = initialized.read()
     assert _initialized = 0
 
     gateway_address.write(_gateway_address)
     l1_address.write(address_l1)
-
+    max_mint.write(max)
     initialized.write(1)
+
+    # _set_uri(uri_)
 
     return ()
 end
@@ -76,7 +91,6 @@ end
 #
 # Initializer
 #
-
 @external
 func initialize_batch{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
         tokens_id_len : felt, tokens_id : felt*, amounts_len : felt, amounts : felt*):
@@ -96,13 +110,17 @@ end
 func initialize_nft_batch{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
         sender : felt, tokens_id_len : felt, tokens_id : felt*, amounts_len : felt,
         amounts : felt*):
-    let (_minted) = minted.read()
-    assert _minted = 0
+    alloc_locals
+    # let (_minted) = minted.read()
+    # assert _minted = 0
+    write_total_amount(sender, amounts_len, amounts)
+    let (_total_amount) = total_amount.read(sender)
+    let (max) = max_mint.read()
+    assert_lt(_total_amount, max)
 
     _mint_batch(sender, tokens_id_len, tokens_id, amounts_len, amounts)
-
-    minted.write(1)
-
+    # minted.write(1)
+    write_tokenId(sender, tokens_id_len, tokens_id)
     return ()
 end
 
@@ -114,7 +132,7 @@ func create_uri{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_pt
 
     let (_mint_id) = _next_token_id.read()
 
-    token_id[0] = _mint_id
+    tokens_id[0] = _mint_id
 
     # update _next_token_id
     _next_token_id.write(_mint_id + 1)
@@ -139,11 +157,32 @@ func mint_nft_batch_with_uri{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, r
     return ()
 end
 
+# @external
+# func initialize_batch{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
+#         tokens_id_len : felt, tokens_id : felt*, amounts_len : felt, amounts : felt*):
+#     let (_minted) = minted.read()
+#     assert _minted = 0
+
+# let (sender) = get_caller_address()
+#     write_total_amount(sender, amounts_len, amounts)
+#     # let (total_amount) = get_total_amount(amounts_len, amounts)
+
+# _mint_batch(sender, tokens_id_len, tokens_id, amounts_len, amounts)
+
+# minted.write(1)
+
+# return ()
+# end
+
 func _mint{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
         to : felt, token_id : felt, amount : felt) -> ():
     assert_not_zero(to)
+    let (max) = max_mint.read()
+    # let (already_mint) = _amount_minted.read(owner=to)
+    # assert_lt(already_mint + amount, max)
     let (res) = balances.read(owner=to, token_id=token_id)
     balances.write(to, token_id, res + amount)
+    # _amount_minted.write(owner=to, already_mint + amount)
     return ()
 end
 
@@ -210,14 +249,96 @@ func populate_balance_of_batch{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*,
     return ()
 end
 
-# @view
-# func owner_of{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-#         tokens_id_len : felt, tokens_id : felt*, amounts_len : felt, amounts : felt*) -> (res : felt):
-#     let (res) = owners.read(token_id=token_id)
-#     assert_not_zero(res)
+func populate_tokens{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
+        owner : felt, rett : felt*, idx : felt) -> (res : felt*):
+    if idx == -1:
+        return (rett)
+    end
+    let (token_id) = get_tokenId.read(owner, idx)
+    rett[0] = token_id
+    return populate_tokens(owner=owner, rett=rett + 1, idx=idx - 1)
+end
 
-# return (res)
-# end
+@external
+func get_all_token_by_owner{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
+        owner : felt) -> (tokens_id_len : felt, tokens_id : felt*):
+    alloc_locals
+    let (local tokens_id : felt*) = alloc()
+    let (nb_tokensId) = total_tokensId.read(owner=owner)
+    let (nv) = populate_tokens(owner, tokens_id, nb_tokensId - 1)
+    return (nv - tokens_id, tokens_id)
+end
+
+func write_tokenId{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        owner : felt, tokens_id_len : felt, tokens_id : felt*):
+    alloc_locals
+    if tokens_id_len == 0:
+        return ()
+    end
+    let (balance) = balances.read(owner, [tokens_id])
+    assert_not_zero(balance)
+    let (idx) = total_tokensId.read(owner)
+    if idx == 0:
+        get_tokenId.write(owner, idx, [tokens_id])
+        total_tokensId.write(owner, idx + 1)
+        tempvar pedersen_ptr : HashBuiltin* = pedersen_ptr
+        tempvar syscall_ptr : felt* = syscall_ptr
+    else:
+        check_tokenId_exist(owner, idx - 1, [tokens_id])
+        tempvar pedersen_ptr : HashBuiltin* = pedersen_ptr
+        tempvar syscall_ptr : felt* = syscall_ptr
+    end
+    return write_tokenId(owner=owner, tokens_id_len=tokens_id_len - 1, tokens_id=tokens_id + 1)
+end
+
+func swap_tokenId{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
+        owner : felt, idx : felt):
+    let (idx_end) = total_tokensId.read(owner=owner)
+    if idx == idx_end:
+        total_tokensId.write(owner, idx_end - 1)
+        tempvar pedersen_ptr : HashBuiltin* = pedersen_ptr
+        tempvar syscall_ptr : felt* = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        return ()
+    end
+    let (newId) = get_tokenId.read(owner, idx + 1)
+    get_tokenId.write(owner, idx, newId)
+    return swap_tokenId(owner=owner, idx=idx + 1)
+end
+
+func delete_tokenId{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
+        owner : felt, idx : felt):
+    alloc_locals
+    local pedersen_ptr : HashBuiltin* = pedersen_ptr
+    if idx == -1:
+        return ()
+    end
+    let (token_id) = get_tokenId.read(owner, idx)
+    let (balance) = balances.read(owner, token_id)
+    tempvar syscall_ptr : felt* = syscall_ptr
+    tempvar range_check_ptr = range_check_ptr
+    if balance == 0:
+        swap_tokenId(owner, idx)
+        tempvar syscall_ptr : felt* = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+    end
+    return delete_tokenId(owner=owner, idx=idx - 1)
+end
+
+func check_tokenId_exist{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
+        owner : felt, idx : felt, token_id : felt):
+    let (exist) = get_tokenId.read(owner, idx)
+    if exist == token_id:
+        return ()
+    end
+    if idx == 0:
+        let (oldIdx) = total_tokensId.read(owner=owner)
+        get_tokenId.write(owner, oldIdx, token_id)
+        total_tokensId.write(owner, oldIdx + 1)
+        return ()
+    end
+    return check_tokenId_exist(owner=owner, idx=idx - 1, token_id=token_id)
+end
 
 #
 # Approvals
@@ -310,8 +431,6 @@ end
 func _assert_is_owner_or_approved{
         pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(address : felt):
     let (caller) = get_caller_address()
-    # get_caller_erc.write(caller)
-    get_address_erc.write(address)
     if caller == address:
         return ()
     end
@@ -343,6 +462,7 @@ func _burn_batch{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_p
 
     assert tokens_id_len = amounts_len
     if tokens_id_len == 0:
+        # tempvar pedersen_ptr : HashBuiltin* = pedersen_ptr
         return ()
     end
     _burn(_from, [tokens_id], [amounts])
@@ -354,41 +474,22 @@ func _burn_batch{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_p
         amounts=amounts + 1)
 end
 
-# @external
-# func create_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-#         owner : felt, token_id : felt, amount : felt):
-#     let (caller) = get_caller_address()
-#     let (_gateway_address- = gateway_address.read()
-#     assert caller = _gateway_address
-
-# _mint(owner, token_id, amount)
-#     return ()
-# end
-
 @external
 func create_token_batch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         owner : felt, tokens_id_len : felt, tokens_id : felt*, amounts_len : felt, amounts : felt*):
     let (caller) = get_caller_address()
     let (_gateway_address) = gateway_address.read()
-    get_caller_erc.write(caller)
-    get_address_erc.write(1)
-
     assert caller = _gateway_address
 
+    write_total_amount(owner, amounts_len, amounts)
+    let (_total_amount) = total_amount.read(owner)
+    let (max) = max_mint.read()
+    assert_lt(_total_amount, max)
+
     _mint_batch(owner, tokens_id_len, tokens_id, amounts_len, amounts)
+    write_tokenId(owner, tokens_id_len, tokens_id)
     return ()
 end
-
-# @external
-# func delete_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-#         owner : felt, token_id : felt, amount : felt):
-#     let (caller) = get_caller_address()
-#     let (_gateway_address- = gateway_address.read()
-#     assert caller = _gateway_address
-
-# _burn(owner, token_id, amount)
-#     return ()
-# end
 
 @external
 func delete_token_batch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
@@ -398,6 +499,8 @@ func delete_token_batch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     assert caller = _gateway_address
 
     _burn_batch(owner, tokens_id_len, tokens_id, amounts_len, amounts)
+    let (idx) = total_tokensId.read(owner)
+    delete_tokenId(owner, idx - 1)
     return ()
 end
 
@@ -411,29 +514,25 @@ func get_l1_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
 end
 
 @view
-func get_caller_adderc{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
-        address : felt):
-    let (address) = get_caller_erc.read()
-    return (address)
-end
-
-@view
-func get_adderc{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
-        address : felt):
-    let (address) = get_address_erc.read()
-    return (address)
-end
-
-@view
 func get_gateway_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
         res : felt):
     let (res) = gateway_address.read()
     return (res)
 end
-
 @view
 func get_next_token_id{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
         res : felt):
     let (res) = _next_token_id.read()
     return (res)
+end
+
+@view
+func write_total_amount{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        owner : felt, amounts_len : felt, amounts : felt*):
+    if amounts_len == 0:
+        return ()
+    end
+    let (res) = total_amount.read(owner)
+    total_amount.write(owner, amounts[0] + res)
+    return write_total_amount(owner=owner, amounts_len=amounts_len - 1, amounts=amounts + 1)
 end

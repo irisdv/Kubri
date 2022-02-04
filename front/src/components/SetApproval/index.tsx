@@ -16,7 +16,7 @@ export function SetApproval({ contract }: { contract?: Contract }) {
         if (approvalState == 0 && approvedGateway == true) {
             setApprovalState(2);
         }
-        if (approvalState==1) {
+        if (approvalState == 1) {
             console.log('approval ongoing');
             var data = transactions.filter((transactions) => (transactions.hash) === approvalTx);
             console.log('data', data);
@@ -27,7 +27,7 @@ export function SetApproval({ contract }: { contract?: Contract }) {
                 setApprovalState(2);
             }
         }
-      }, [approvalState, transactions, approvalTx, approvedGateway])
+    }, [approvalState, transactions, approvalTx, approvedGateway])
 
     const approveUserFront = async () => {
         setApprovalState(1);
@@ -43,7 +43,7 @@ export function SetApproval({ contract }: { contract?: Contract }) {
         <div>
             <p>To bridge your NFTs to L1 first you need to set approval for the gateway contract to transfer your NFTs</p>
             <div className="center-cnt">
-                <button className={approvalState==0 ? "btn btn-accent my-2" : "btn btn-accent my-2 loading"} onClick={() => approveUserFront() }>Set Approval</button>
+                <button className={approvalState == 0 ? "btn btn-accent my-2" : "btn btn-accent my-2 loading"} onClick={() => approveUserFront()}>Set Approval</button>
             </div>
         </div>
     );

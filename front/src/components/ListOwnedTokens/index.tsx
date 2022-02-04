@@ -9,7 +9,7 @@ import { useStarknetERC1155Manager } from '../../providers/StarknetERC1155Contex
 import { useTransaction, useTransactions } from "../../providers/TransactionsProvider";
 import { useBridged1155Contract } from "../../lib/bridged1155";
 
-import { useTokenURI } from '../../hooks/useTokenURI';
+// import { useTokenURI } from '../../hooks/useTokenURI';
 
 import { number, stark, shortString } from 'starknet';
 const { hexToDecimalString } = number;
@@ -62,10 +62,10 @@ export function ListOwnedTokens({ contract }: { contract?: Contract }) {
                 //     }
                 // }, 1000)
             })
-            
+
         }
         console.log('finalURI', finalURI)
-      }, [ownedTokens, address])
+    }, [ownedTokens, address])
 
     // const approveUserFront = async () => {
     //     setApprovalState(1);
@@ -81,17 +81,17 @@ export function ListOwnedTokens({ contract }: { contract?: Contract }) {
         <div>
             <p>List of owned Tokens </p>
             {finalURI && finalURI.map((item, id) => {
-                    return(<p>test</p>)
-                }
+                return (<p>test</p>)
+            }
             )}
 
             {ownedTokens && ownedTokens.map((item) => {
-                    return(<p>{item}</p>)
-                }
+                return (<p>{item}</p>)
+            }
             )}
-             {/* <button className={approvalState==0 ? "btn btn-accent mr-2" : "btn btn-accent mr-2 loading"} onClick={() => approveUserFront() }>Set Approval</button> */}
+            {/* <button className={approvalState==0 ? "btn btn-accent mr-2" : "btn btn-accent mr-2 loading"} onClick={() => approveUserFront() }>Set Approval</button> */}
             {/* <Row style={{ padding: '10px', justifyContent: 'center' }}> */}
-                {/* <Button
+            {/* <Button
                     type="primary"
                     onClick={() => set_approval_for_all && set_approval_for_all({ l2TokenAddress, approved: 1 })}
                     style={{ backgroundColor: '#002766', borderColor: '#002766' }}
