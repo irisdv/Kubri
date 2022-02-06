@@ -3,44 +3,12 @@ import { NFTStorage, File, Blob } from 'nft.storage';
 import { UploadFile } from '../UploadFile';
 import { ConnectedOnly } from "../ConnectedOnly";
 import { Contract } from "starknet";
-import { useStarknetERC1155Manager } from '../../providers/StarknetERC1155Context';
-import { useEthereumERC1155Manager } from '../../providers/EthereumERC1155Context';
-import { useTransaction, useTransactions } from "../../providers/TransactionsProvider";
-import { VoyagerLink } from "../VoyagerLink";
-import { useStarknetInvoke, useStarknetCall } from "../../lib/hooks";
-// import { useStarknet } from "../../providers/StarknetProvider";
-import { SetApproval } from "../SetApproval";
-import { BridgeNFTonL1 } from "../BridgeOnL1";
-import { ListOwnedTokens } from "../ListOwnedTokens";
-import { stark, shortString, number } from 'starknet';
-import { ConnectedWallet } from "../ConnectedWallet";
-import { MintNFTonL1 } from "../MintNFTOnL1";
-import { EtherscanLink } from "../EtherscanLink";
+import { useTransactions } from "../../providers/TransactionsProvider";
+import { number } from 'starknet';
 const { hexToDecimalString } = number;
-// const { decodeShortString, encodeShortString } = shortString;
-
 
 export function StoreMetadata({ contract }: { contract?: Contract }) {
-    const { addTransaction } = useTransactions();
-    const { nextTokenID, address, ownedTokens, mint1155NFT, approvedGateway, bridgeToL1 } = useStarknetERC1155Manager();
-    const { txHash, l1_address, l1_token_address } = useEthereumERC1155Manager();
-    // const { bridgeFromL2, bridgeState, mintFromL2, mintState } = useEthereumERC1155Manager();
-
-    // const { account, gateway } = useStarknet();
-    console.log('nextTokenID front', nextTokenID);
-    console.log('ownedTokens from context', ownedTokens);
-
-    const {
-        invoke: mint_nft_batch_with_uri,
-        hash,
-        submitting
-    } = useStarknetInvoke(contract, "mint_nft_batch_with_uri");
-    const transactionStatus = useTransaction(hash);
     const { transactions } = useTransactions();
-    // console.log('submitting', submitting);
-    // console.log('transactionStatus', transactionStatus);
-    console.log('transactions', transactions);
-
     const [step, setStep] = useState(0);
     const [minted, setMinted] = useState(0);
     const [bridgeState, setBridgeState] = useState(0);
@@ -74,8 +42,6 @@ export function StoreMetadata({ contract }: { contract?: Contract }) {
     const [stored, setStored] = useState(false);
     const [tokensID, setTokensID] = useState<number[]>([]);
     const [supply, setSupply] = useState<number[]>([]);
-
-    console.log('formArray', formArray);
 
     interface TFormArray {
         name?: string;
@@ -235,6 +201,7 @@ export function StoreMetadata({ contract }: { contract?: Contract }) {
         const supplyTokens: number[] = [];
         // const listURIs : string[] = [];
         const directory = [];
+        const nextTokenID = '1';
         const nextID = parseInt(hexToDecimalString(nextTokenID));
 
         console.log('newFile', newFile);
@@ -322,29 +289,12 @@ export function StoreMetadata({ contract }: { contract?: Contract }) {
 
     const MintNFT = async (tokensID: [], supplyTokens: [], directory: string) => {
         setMinted(1);
-
-        console.log('size directory url', directory.length);
-        // if (mint_nft_batch_with_uri) {
-        //     mint_nft_batch_with_uri({ account, tokensID, supplyTokens, encodeShortString(uri_a), encodeShortString(uri_b) });
-        //     console.log('transactionStatus', transactionStatus);
-        //     console.log('transactions', transactions);
+        // const tx = await mint1155NFT(tokensID, supplyTokens);
+        // @ts-ignore
+        // if (tx && tx.transaction_hash) {
+        //     // @ts-ignore
+        //     addTransaction(tx);
         // }
-        const tx = await mint1155NFT(tokensID, supplyTokens, directory);
-        // @ts-ignore
-        if (tx && tx.transaction_hash) {
-            // @ts-ignore
-            addTransaction(tx);
-        }
-    }
-
-    const bridgeBatchFront = async () => {
-        setBridgeState(1);
-        const tx = await bridgeToL1(tokensID as [], supply as []);
-        // @ts-ignore
-        if (tx && tx.transaction_hash) {
-            // @ts-ignore
-            addTransaction(tx);
-        }
     }
 
     // const ConsumeInL1 = async () => {
@@ -415,7 +365,7 @@ export function StoreMetadata({ contract }: { contract?: Contract }) {
     return (
         <>
             <div className="p-5">
-                {step == 5 && ownedTokens.length > 0 ?
+                {/* {step == 5 && ownedTokens.length > 0 ?
                     <>
                         <div className="alert alert-info background-neutral">
                             <div className="flex-1">
@@ -427,7 +377,7 @@ export function StoreMetadata({ contract }: { contract?: Contract }) {
                         </div>
                     </>
                     : ''
-                }
+                } */}
                 <div className="alert alert-info background-neutral">
                     <div className="flex-1">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="w-6 h-6 mx-2 stroke-current text-primary">
@@ -442,8 +392,9 @@ export function StoreMetadata({ contract }: { contract?: Contract }) {
                     <li data-content={step < 3 ? "3" : "✓"} className={step < 2 ? "step" : "step step-accent"}>Get your NFTs on L1</li>
                     <li data-content={step < 4 ? "4" : "✓"} className={step < 3 ? "step" : "step step-accent"}>Mint NFT on L1</li>
                 </ul>
+                <p>step = {step}</p>
             </div>
-            {step == 5 &&
+            {step == 0 &&
                 <>
                     <div className="grid grid-cols-2 gap-5 px-10">
 
@@ -605,156 +556,6 @@ export function StoreMetadata({ contract }: { contract?: Contract }) {
                     </div>
 
                 </>}
-            {step == 5 &&
-                <>
-                    <div className="grid grid-cols-2 gap-3 px-10">
-                        <div className="card rounded-lg shadow-2xl px-10 py-5 mb-3">
-                            {formArray && tokensID.length > 0 && supply.length > 0 ?
-                                <>
-                                    {formArray.map((item, i) => {
-                                        return (
-                                            <div key={i}>
-                                                {item && item.image ?
-                                                    <>
-                                                        <div className="center-cnt">
-                                                            <img src={item.image} height={item.imgHeight} width={item.imgWidth}></img>
-                                                        </div>
-                                                    </>
-                                                    : ''}
-                                            </div>
-
-                                        );
-                                    })}
-                                </>
-
-                                :
-                                ownedTokens && ownedTokens.length > 0 ?
-                                    <>
-                                        <ListOwnedTokens />
-                                    </>
-                                    :
-                                    <p>Oups ! It seems you don't have any tokens to bridge</p>
-                            }
-                        </div>
-                        <div className="card rounded-lg shadow-2xl px-10 py-5 mb-3">
-                            {!approvedGateway ?
-                                <ConnectedOnly>
-                                    <SetApproval />
-                                </ConnectedOnly>
-                                :
-                                <>
-                                    <p>check icon : Gave approval for Gateway.cairo to become operator</p>
-                                    <p>You can now bridge your NFTs to L1</p>
-                                    <button className={bridgeState == 0 ? "btn btn-accent mr-2" : "btn btn-accent mr-2 loading"} onClick={() => bridgeBatchFront()}>Bridge to L1</button>
-                                </>
-
-                            }
-
-                            {/* {approvalState==0 || approvalState==1 ? 
-                            <>
-                                <div>
-                                    <p>To bridge your NFTs to L1 first you need to set approval for the gateway contract to transfer your NFTs</p>
-                                </div>
-                                <button className={approvalState==0 ? "btn btn-accent mr-2" : "btn btn-accent mr-2 loading"} onClick={() => approveUserFront() }>Set Approval</button>
-                            </>
-                        : 
-                        <>
-                            <p>check icon : Gave approval for Gateway.cairo to become operator</p>
-                            <p>You can now bridge your NFTs to L1</p>
-                            <button className={bridgeState==0 ? "btn btn-accent mr-2" : "btn btn-accent mr-2 loading"} onClick={() => bridgeBatchFront() }>Bridge to L1</button>
-                        </>
-                            
-                        } */}
-                            <ul className="mt-4">
-                                <li><b>Starknet ERC1155 contract:</b> <VoyagerLink.Contract contract={address} /></li>
-                                <li><b>Starknet Gateway contrac:</b> <VoyagerLink.Contract contract={address} /></li>
-                                <li><b>Ethereum contract :</b> </li>
-                                {transactions.length > 0 ?
-                                    <li><b>Transactions:</b>
-                                        <ul>
-                                            {transactions.map((tx, idx) => (
-                                                <li key={idx}>
-                                                    <VoyagerLink.Transaction transactionHash={tx.hash} />
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </li>
-                                    : ''
-                                }
-
-                            </ul>
-
-                        </div>
-
-                    </div>
-
-                </>}
-            {step == 0 &&
-                <>
-                    <div className="grid grid-cols-2 gap-3 px-10">
-                        <div className="card rounded-lg shadow-2xl px-10 py-5 mb-3">
-                            {formArray && tokensID.length > 0 && supply.length > 0 ?
-                                <>
-                                    {formArray.map((item, i) => {
-                                        return (
-                                            <div key={i}>
-                                                {item && item.image ?
-                                                    <>
-                                                        <div className="center-cnt">
-                                                            <img src={item.image} height={item.imgHeight} width={item.imgWidth}></img>
-                                                        </div>
-                                                    </>
-                                                    : ''}
-                                            </div>
-
-                                        );
-                                    })}
-                                </>
-
-                                :
-                                ownedTokens && ownedTokens.length > 0 ?
-                                    <>
-                                        <ListOwnedTokens />
-                                    </>
-                                    :
-                                    <p>Oups ! It seems you don't have any tokens to bridge</p>
-                            }
-                        </div>
-                        <div className="card rounded-lg shadow-2xl px-10 py-5 mb-3">
-                            {
-                                <ConnectedWallet>
-                                    <BridgeNFTonL1 tokensID={[1, 2]} supply={[5, 10]} />
-                                </ConnectedWallet>
-                            }
-                            <ul className="mt-4">
-                                <li><b>Ethereum ERC1155 contract:</b> <EtherscanLink.Contract contract={l1_token_address} /></li>
-                                <li><b>Ethereum Gateway contract:</b> <EtherscanLink.Contract contract={l1_address} /></li>
-                                <li><b>Ethereum Transaction:</b> <EtherscanLink.Transaction transactionHash={txHash} /></li>
-                            </ul>
-
-                        </div>
-
-                    </div>
-                    <p>step 3</p>
-                </>}
-            {step == 3 &&
-                <>
-                    <div className="card rounded-lg shadow-2xl px-10 py-5 mb-3">
-                        {
-                            <ConnectedWallet>
-                                <MintNFTonL1 tokensID={[1, 2]} supply={[5, 10]} />
-                            </ConnectedWallet>
-                        }
-                        <ul className="mt-4">
-                            <li><b>Ethereum ERC1155 contract:</b> <EtherscanLink.Contract contract={l1_token_address} /></li>
-                            <li><b>Ethereum Gateway contract:</b> <EtherscanLink.Contract contract={l1_address} /></li>
-                            <li><b>Ethereum Transaction:</b> <EtherscanLink.Transaction transactionHash={txHash} /></li>
-                        </ul>
-
-                    </div>
-
-                </>}
-
         </>
     );
 }

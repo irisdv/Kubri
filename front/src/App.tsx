@@ -1,7 +1,6 @@
 import * as React from 'react'
 import "./App.css";
 import { BrowserRouter as Router, Route } from "react-router-dom";
-import { FrontPage } from "./pages/FrontPage";
 import { MintPage } from "./pages/MintPage";
 import { BlockHashProvider, useBlockHash } from "./providers/BlockHashProvider";
 import { StarknetProvider } from "./providers/StarknetProvider";
@@ -23,8 +22,7 @@ function App() {
         <>
             <Router>
                 <HeaderSite />
-                <Route exact path="/"> <FrontPage /></Route>
-                <Route path="/mint"><MintPage /></Route>
+                <Route exact path="/"> <MintPage /></Route>
             </Router>
         </>
     );

@@ -17,6 +17,30 @@
         "type": "struct"
     },
     {
+        "inputs": [],
+        "name": "get_is_caller",
+        "outputs": [
+            {
+                "name": "res",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_is_sender",
+        "outputs": [
+            {
+                "name": "res",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
         "inputs": [
             {
                 "name": "_gateway_address",
@@ -24,10 +48,6 @@
             },
             {
                 "name": "address_l1",
-                "type": "felt"
-            },
-            {
-                "name": "max",
                 "type": "felt"
             }
         ],
@@ -88,32 +108,29 @@
     {
         "inputs": [
             {
-                "name": "tokens_id_len",
-                "type": "felt"
-            },
-            {
                 "name": "tokens_id",
-                "type": "felt*"
-            },
-            {
-                "name": "amounts_len",
                 "type": "felt"
             },
             {
-                "name": "amounts",
-                "type": "felt*"
+                "name": "uri_len",
+                "type": "felt"
             },
             {
-                "name": "uri_",
-                "type": "TokenUri"
+                "name": "uri",
+                "type": "felt*"
             }
         ],
-        "name": "mint_nft_batch_with_uri",
+        "name": "_set_uri",
         "outputs": [],
         "type": "function"
     },
     {
-        "inputs": [],
+        "inputs": [
+            {
+                "name": "token_id",
+                "type": "felt"
+            }
+        ],
         "name": "uri",
         "outputs": [
             {
@@ -196,6 +213,7 @@
                 "type": "felt*"
             }
         ],
+        "stateMutability": "view",
         "type": "function"
     },
     {

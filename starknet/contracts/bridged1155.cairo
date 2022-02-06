@@ -47,10 +47,6 @@ end
 func get_tokenId(owner : felt, index : felt) -> (res : felt):
 end
 
-@storage_var
-func _next_token_id() -> (res : felt):
-end
-
 # ERC1155 returns the same URI for all token types.
 # We use struct as felt can only store string whose length is at most 31 characters
 # Client calling the function must replace the '{id}' substring with the actual token type ID
@@ -60,7 +56,11 @@ struct TokenUri:
 end
 
 @storage_var
-func _uri() -> (res : TokenUri):
+func _next_token_id() -> (res : felt):
+end
+
+@storage_var
+func _uri(token_id : felt) -> (res : TokenUri):
 end
 
 @storage_var
@@ -69,24 +69,18 @@ end
 
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        _gateway_address : felt, address_l1 : felt, max : felt):
+        _gateway_address : felt, address_l1 : felt):
     let (_initialized) = initialized.read()
     assert _initialized = 0
 
     gateway_address.write(_gateway_address)
     l1_address.write(address_l1)
-    max_mint.write(max)
+    # max_mint.write(max)
     initialized.write(1)
 
-    # _set_uri(uri_)
-
     return ()
 end
 
-func _set_uri{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(uri_ : TokenUri):
-    _uri.write(uri_)
-    return ()
-end
 
 #
 # Initializer
@@ -110,17 +104,21 @@ end
 func initialize_nft_batch{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
         sender : felt, tokens_id_len : felt, tokens_id : felt*, amounts_len : felt,
         amounts : felt*):
-    alloc_locals
+    # alloc_locals
     # let (_minted) = minted.read()
     # assert _minted = 0
-    write_total_amount(sender, amounts_len, amounts)
-    let (_total_amount) = total_amount.read(sender)
-    let (max) = max_mint.read()
-    assert_lt(_total_amount, max)
+    # write_total_amount(sender, amounts_len, amounts)
+    # let (_total_amount) = total_amount.read(sender)
+    # let (max) = max_mint.read()
+    # assert_lt(_total_amount, max)
 
     _mint_batch(sender, tokens_id_len, tokens_id, amounts_len, amounts)
     # minted.write(1)
     write_tokenId(sender, tokens_id_len, tokens_id)
+
+    # let (_mint_id) = _next_token_id.read()
+    # _next_token_id.write(_mint_id + tokens_id_len)
+
     return ()
 end
 
@@ -141,38 +139,14 @@ func create_uri{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_pt
 end
 
 @external
-func mint_nft_batch_with_uri{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-        tokens_id_len : felt, tokens_id : felt*, amounts_len : felt, amounts : felt*,
-        uri_ : TokenUri):
-    let (sender) = get_caller_address()
-
-    _set_uri(uri_)
-
-    _mint_batch(sender, tokens_id_len, tokens_id, amounts_len, amounts)
-
-    # update _next_token_id
-    let (_mint_id) = _next_token_id.read()
-    _next_token_id.write(_mint_id + 1)
-
+func _set_uri{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        tokens_id : felt, uri_len : felt, uri : felt*):
+    alloc_locals
+    assert_not_zero(uri_len)
+    local newstruct : TokenUri = TokenUri(uri[0], uri[1])
+    _uri.write(tokens_id, newstruct)
     return ()
 end
-
-# @external
-# func initialize_batch{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-#         tokens_id_len : felt, tokens_id : felt*, amounts_len : felt, amounts : felt*):
-#     let (_minted) = minted.read()
-#     assert _minted = 0
-
-# let (sender) = get_caller_address()
-#     write_total_amount(sender, amounts_len, amounts)
-#     # let (total_amount) = get_total_amount(amounts_len, amounts)
-
-# _mint_batch(sender, tokens_id_len, tokens_id, amounts_len, amounts)
-
-# minted.write(1)
-
-# return ()
-# end
 
 func _mint{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
         to : felt, token_id : felt, amount : felt) -> ():
@@ -211,8 +185,8 @@ end
 # Returns the same URI for all tokens type ID
 # Client calling the function must replace the {id} substring with the actual token type ID
 @view
-func uri{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (res : TokenUri):
-    let (res) = _uri.read()
+func uri{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(token_id : felt) -> (res : TokenUri):
+    let (res) = _uri.read(token_id)
     return (res)
 end
 
@@ -259,7 +233,8 @@ func populate_tokens{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_che
     return populate_tokens(owner=owner, rett=rett + 1, idx=idx - 1)
 end
 
-@external
+# @external
+@view
 func get_all_token_by_owner{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
         owner : felt) -> (tokens_id_len : felt, tokens_id : felt*):
     alloc_locals

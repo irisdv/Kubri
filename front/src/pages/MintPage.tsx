@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StoreMetadata } from '../components/StoreMetadata';
+import { Process } from '../components/Process';
 import { useBridged1155Contract } from "../lib/bridged1155";
 
 
@@ -19,7 +20,7 @@ export function MintPage() {
     return (
         <>
             <div>
-                <StoreMetadata contract={bridged1155Contract} />
+                <Process contract={bridged1155Contract} />
             </div>
         </>
     );

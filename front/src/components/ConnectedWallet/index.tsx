@@ -18,7 +18,7 @@ export function ConnectedWallet({ children }: ConnectedWalletProps): JSX.Element
             <div>
                 <div style={{ padding: '10px', justifyContent: 'center' }}>
                     {!account && <button
-                        className="btn btn-primary"
+                        className="btn btn-accent"
                         onClick={() => activateBrowserWallet()}
                     >Connect MetaMask Wallet</button>}
                     {/* {account && <button

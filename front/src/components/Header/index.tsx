@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { ConnectedOnly } from '../ConnectedOnly'
 import { ConnectedInfo } from '../ConnectedInfo';
 import { ConnectedWallet } from '../ConnectedWallet';
+import { ConnectedInfoEth } from '../ConnectedInfoEth';
 export function HeaderSite() {
 
     return (
@@ -18,10 +19,6 @@ export function HeaderSite() {
                         <p className="text-xl">Mint & bridge ERC1155 NFTs from Starknet to Ethereum</p>
                         {/* <nav>
                             <NavLink to='/' className="btn btn-ghost btn-sm rounded-btn nav-link text-lg" activeClassName="active">Home</NavLink>
-                        </nav>
-
-                        <nav>
-                            <NavLink to='/mint' className="btn btn-ghost btn-sm rounded-btn nav-link text-lg" activeClassName="active">Mint ERC1155 NFT</NavLink>
                         </nav> */}
                     </div>
                 </div>
@@ -29,12 +26,10 @@ export function HeaderSite() {
                     <ConnectedOnly>
                         <ConnectedInfo />
                     </ConnectedOnly>
-                </div>
-                {/* <div className="navbar-end">
                     <ConnectedWallet>
-                        <ConnectedInfo />
+                        <ConnectedInfoEth />
                     </ConnectedWallet>
-                </div> */}
+                </div>
             </div>
         </>
     );

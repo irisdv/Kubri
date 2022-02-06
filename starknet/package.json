@@ -7,7 +7,7 @@
     "compile": "npx hardhat starknet-compile"
   },
   "devDependencies": {
-    "@shardlabs/starknet-hardhat-plugin": "^0.3.10",
+    "@shardlabs/starknet-hardhat-plugin": "^0.3.11",
     "@types/chai": "^4.2.22",
     "@types/mocha": "^9.0.0",
     "chai": "^4.3.4",

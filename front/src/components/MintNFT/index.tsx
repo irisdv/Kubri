@@ -8,7 +8,6 @@ import { Button, Input, Row, Col } from 'antd';
 
 export function InitializeNFT({ contract }: { contract?: Contract }) {
     const { account } = useStarknet();
-    console.log(account);
     const [to, setTo] = React.useState(account);
     const [tokensId, setTokensId] = React.useState(["0x01", "0x02"]);
     const [amounts, setAmounts] = React.useState([3, 2]);
