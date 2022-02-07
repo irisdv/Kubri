@@ -30,6 +30,7 @@ async function main() {
   console.log("Gateway1155:", gateway.address);
   const bytecode = await gateway.getBytecode();
   const AddressTMP = await gateway.getAddress(bytecode, 0x123456788);
+
   console.log("ComputeAddress =", AddressTMP);
 }
 

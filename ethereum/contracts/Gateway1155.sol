@@ -38,7 +38,7 @@ contract Gateway1155 {
 
     // mapping(address => mapping(uint256 => bool)) private _idExist;
 
-    event Deployed(address addr, uint256 salt);
+    event Deployed(address addr);
 
     modifier checkIdAndAmount(
         uint256[] memory _tokensId,
@@ -261,25 +261,24 @@ contract Gateway1155 {
     ) external checkIdAndAmount(_tokensId, _amounts) {
         bytes memory bytecode = this.getBytecode();
         address newContractAdd = this.getAddress(bytecode, 0x123456788);
-        if (!_isDeployed(newContractAdd)) {
-            BridgeErc1155 bridge = new BridgeErc1155{salt: 0x123456788}(
-                address(this)
-            );
+        if (!_isDeployed[newContractAdd]) {
+            address deployBridgeAdd = deploy(bytecode, 0x123456788);
             require(
-                address(bridge) == newContractAdd,
+                deployBridgeAdd == newContractAdd,
                 "Precompute address and deployed address are not the same"
             );
-            _isDeployed[address(bridge)] = true;
-        } else {
-            BridgeErc1155 bridge = BridgeErc1155(newContractAdd);
+            _isDeployed[deployBridgeAdd] = true;
+            // bridge.mintNFT(msg.sender, _tokensId, _amounts);
         }
+        BridgeErc1155 bridge = BridgeErc1155(newContractAdd);
+        bridge.mintNFT(msg.sender, _tokensId, _amounts);
         // require(
         //     _listeBridgeContract[msg.sender] != address(0),
         //     "Bridge contract address can not be zero"
         // );
         // address bridgeAddress = _listeBridgeContract[msg.sender];
         // BridgeErc1155 bridge = BridgeErc1155(bridgeAddress);
-        bridge.mintNFT(msg.sender, _tokensId, _amounts);
+        // bridge.mintNFT(msg.sender, _tokensId, _amounts);
         for (uint256 i = 0; i < _tokensId.length; i++) {
             _listeTokensIDAmount[msg.sender][_tokensId[i]] -= _amounts[i];
             // _listeIDByOwner[msg.sender].pop(_tokensId[i]);
@@ -312,7 +311,6 @@ contract Gateway1155 {
                 keccak256(bytecode)
             )
         );
-
         return address(uint160(uint256(hash)));
     }
 
@@ -332,7 +330,7 @@ contract Gateway1155 {
             }
         }
 
-        emit Deployed(addr, _salt);
+        emit Deployed(addr);
         return addr;
     }
 }

@@ -15,6 +15,8 @@ export function BridgeNFTonL1({ contract, tokensID, supply }: { contract?: Contr
     }, [bridgeState.status, endpointState])
 
     const BridgeOnL1Front = async () => {
+        // console.log("ID: ", tokensID)
+        // console.log("Amounts: ", supply)
         setEndpointState(1);
         await bridgeFromL2(tokensID as [], supply as []);
         console.log("STATUS2: ", bridgeState.status)

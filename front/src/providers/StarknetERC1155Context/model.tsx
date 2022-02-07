@@ -6,7 +6,7 @@ export interface StarknetERC1155State {
 	approvalTx: string;
 	approvedGateway: boolean;
 	bridgingTx: string;
-	bridgeToL1: (t: [], u: [], v: string) => void;
+	bridgeToL1: (t: [], u: [], v: string, a: string) => void;
 	approveUser: (t: string) => void;
 }
 
@@ -15,9 +15,9 @@ export const STARKNET_ERC1155_INITIAL_STATE: StarknetERC1155State = {
 	valid: false,
 	balanceOf1: '',
 	balanceOf2: '',
-	approvalTx : '',
+	approvalTx: '',
 	approvedGateway: false,
 	bridgingTx: '',
 	bridgeToL1: () => { },
-	approveUser: () => {}
+	approveUser: () => { }
 }

@@ -23,83 +23,83 @@ interface StarknetERC1155ManagerState {
 }
 
 interface SetAddress {
-    type: "set_address";
-    address: string;
+	type: "set_address";
+	address: string;
 }
 interface SetValid {
-    type: "set_valid";
-    valid: boolean;
+	type: "set_valid";
+	valid: boolean;
 }
 interface SetBalanceOf1 {
-    type: "set_balance_of_1";
-    balanceOf1: string;
+	type: "set_balance_of_1";
+	balanceOf1: string;
 }
 interface SetBalanceOf2 {
-    type: "set_balance_of_2";
-    balanceOf2: string;
+	type: "set_balance_of_2";
+	balanceOf2: string;
 }
 interface setApprovalTx {
-    type: "set_approval_tx";
-    approvalTx: string;
+	type: "set_approval_tx";
+	approvalTx: string;
 }
 interface SetApprovedGateway {
-    type: "set_approved_gateway";
-    approvedGateway: boolean;
+	type: "set_approved_gateway";
+	approvedGateway: boolean;
 }
 
-type Action = SetAddress  | SetValid | SetBalanceOf1 | SetBalanceOf2 | setApprovalTx | SetApprovedGateway;
+type Action = SetAddress | SetValid | SetBalanceOf1 | SetBalanceOf2 | setApprovalTx | SetApprovedGateway;
 
 function reducer(
-    state: StarknetERC1155ManagerState,
-    action: Action
-  ): StarknetERC1155ManagerState {
-    switch (action.type) {
-      case "set_address": {
-        return { ...state, address: action.address };
-      }
-      case "set_valid": {
-        return { ...state, valid: action.valid };
-      }
-      case "set_balance_of_1": {
-        return { ...state, balanceOf1: action.balanceOf1 };
-      }
-      case "set_balance_of_2": {
-        return { ...state, balanceOf2: action.balanceOf2 };
-      }
-	  case "set_approval_tx": {
-        return { ...state, approvalTx: action.approvalTx };
-      }
-	  case "set_approved_gateway": {
-        return { ...state, approvedGateway: action.approvedGateway };
-      }
-      default: {
-        return state;
-      }
-    }
-  }
+	state: StarknetERC1155ManagerState,
+	action: Action
+): StarknetERC1155ManagerState {
+	switch (action.type) {
+		case "set_address": {
+			return { ...state, address: action.address };
+		}
+		case "set_valid": {
+			return { ...state, valid: action.valid };
+		}
+		case "set_balance_of_1": {
+			return { ...state, balanceOf1: action.balanceOf1 };
+		}
+		case "set_balance_of_2": {
+			return { ...state, balanceOf2: action.balanceOf2 };
+		}
+		case "set_approval_tx": {
+			return { ...state, approvalTx: action.approvalTx };
+		}
+		case "set_approved_gateway": {
+			return { ...state, approvedGateway: action.approvedGateway };
+		}
+		default: {
+			return state;
+		}
+	}
+}
 
 const fetching = (...args: AsyncState[]): boolean => {
 	return args.map(v => v.fetching).filter(v => v === true).length > 0
 }
 
-export function useStarknetERC1155Manager() : StarknetERC1155State {
-    const starknet = useStarknet();
-    const [timer, setTimer] = useState(Date.now());
+export function useStarknetERC1155Manager(): StarknetERC1155State {
+	const starknet = useStarknet();
+	const [timer, setTimer] = useState(Date.now());
 	const [balance1, setBalance1] = useAsyncState('');
 	const [balance2, setBalance2] = useAsyncState('');
 
-    const [state, dispatch] = React.useReducer(reducer, {
-        address: '',
-        valid: false,
+	const [state, dispatch] = React.useReducer(reducer, {
+		address: '',
+		valid: false,
 		balanceOf1: '',
 		balanceOf2: '',
 		approvalTx: '',
 		approvedGateway: false,
 		bridgingTx: '',
-      });
-    const {address, valid, balanceOf1, balanceOf2, approvalTx, approvedGateway, bridgingTx } = state;
+	});
+	const { address, valid, balanceOf1, balanceOf2, approvalTx, approvedGateway, bridgingTx } = state;
 
-    useEffect(() => {
+	useEffect(() => {
 		const tid = setTimeout(() => {
 			setTimer(Date.now())
 		}, 5000);
@@ -114,13 +114,13 @@ export function useStarknetERC1155Manager() : StarknetERC1155State {
 		}
 	}, [StarknetBridged1155, address])
 
-    useEffect(() => {
+	useEffect(() => {
 		if (starknet.starknet && starknet.account && address && !fetching(balance1, balance2)) {
-            balance1.setFetching();
-            balance2.setFetching();
+			balance1.setFetching();
+			balance2.setFetching();
 
 			console.log('tried fetching');
-            
+
 			setTimeout(
 				async () => {
 					let _balance1;
@@ -160,11 +160,11 @@ export function useStarknetERC1155Manager() : StarknetERC1155State {
 						setBalance2(_balance2?.result[0]);
 						dispatch({ type: "set_balance_of_2", balanceOf2: hexToDecimalString(_balance2.result[0]) });
 					}
-					
+
 					balance1.setNotFetching();
-                    balance2.setNotFetching();
+					balance2.setNotFetching();
 				}, 0);
-			}
+		}
 
 	}, [timer, starknet.starknet, starknet.account, address]);
 
@@ -181,7 +181,7 @@ export function useStarknetERC1155Manager() : StarknetERC1155State {
 							BigNumber.from(StarknetGateway1155.address).toString()
 						]
 					})
-					console.log('hasBeenApproved', _hasBeenApproved.result[0]); 
+					console.log('hasBeenApproved', _hasBeenApproved.result[0]);
 
 				} catch (e) {
 					console.log('error', e);
@@ -193,7 +193,7 @@ export function useStarknetERC1155Manager() : StarknetERC1155State {
 		}
 	}, [starknet.starknet, starknet.account, address, approvalTx, approvedGateway])
 
-	const approveUser = useCallback( async (_address: string) => {
+	const approveUser = useCallback(async (_address: string) => {
 		if (starknet.starknet && starknet.account) {
 
 			const tx = await starknet.starknet.signer.invokeFunction(
@@ -205,29 +205,40 @@ export function useStarknetERC1155Manager() : StarknetERC1155State {
 			dispatch({ type: "set_approval_tx", approvalTx: tx.transaction_hash });
 			return tx;
 		}
-	}, [starknet.starknet, starknet.account]) 
+	}, [starknet.starknet, starknet.account])
 
-    // Set up function Bridge to L1
-	const bridgeToL1 = useCallback(async (tokenId: [], amounts: [], _l1_address: string) => {
+	// Set up function Bridge to L1
+	const bridgeToL1 = useCallback(async (tokenId: [], amounts: [], _l1_token_address: string, metamaskAccount: string) => {
 
 		if (starknet.starknet && starknet.gateway) {
+			let calldata = [BigNumber.from(_l1_token_address).toString(),
+			BigNumber.from(address).toString(), tokenId.length]
+			tokenId.forEach(element => calldata.push(element));
+			calldata.push(amounts.length);
+			amounts.forEach(element => calldata.push(element));
+			calldata.push(BigNumber.from(metamaskAccount).toString());
 			const tx = await starknet.starknet.signer.invokeFunction(
 				starknet.gateway,
 				getSelectorFromName('bridge_to_mainnet'),
-				[
-					BigNumber.from(_l1_address).toString(),
-					BigNumber.from(address).toString(),
-					tokenId,
-					amounts,
-					BigNumber.from('0x9524F1f9F002a7FE810d47C940Eb7D34668023d7').toString()
-				]
+				calldata,
+				// [
+				// 	BigNumber.from(_l1_token_address).toString(),
+				// 	BigNumber.from(address).toString(),
+				// 	tokenId.length,
+				// 	tokenId.at(0),
+				// 	tokenId.at(1),
+				// 	amounts.length,
+				// 	amounts.at(0),
+				// 	amounts.at(1),
+				// 	BigNumber.from(metamaskAccount).toString()
+				// ]
 			);
 			console.log(tx);
-			return tx;
+			return 0;
 		}
 
 	}, [starknet.account, starknet.gateway, starknet.starknet]);
 
-    return {address, valid, balanceOf1, balanceOf2, approvalTx, approvedGateway, bridgingTx, bridgeToL1, approveUser};
+	return { address, valid, balanceOf1, balanceOf2, approvalTx, approvedGateway, bridgingTx, bridgeToL1, approveUser };
 
 }

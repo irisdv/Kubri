@@ -21,15 +21,14 @@ import { MintNFTonL1 } from "../MintNFTOnL1";
 export function Process({ contract }: { contract?: Contract }) {
     const { account } = useStarknet();
     const { address, balanceOf1, balanceOf2, approvedGateway, bridgeToL1 } = useStarknetERC1155Manager();
-    const { txHash, l1_address, l1_token_address } = useEthereumERC1155Manager();
+    const { txHash, l1_address, l1_token_address, metamaskAccount } = useEthereumERC1155Manager();
     const { addTransaction } = useTransactions();
     const { transactions } = useTransactions();
 
     const [step, setStep] = useState(0);
-
     const [minting, setMinting] = useState(0);
-    const supply = [5,10];
-    const tokensID = [1,2];
+    const supply = [5, 10];
+    const tokensID = [1, 2];
     const {
         invoke: initialize_nft_batch,
         hash,
@@ -42,31 +41,32 @@ export function Process({ contract }: { contract?: Contract }) {
     // -------------------------   Mint NFT ------------------------------
 
     const MintNFT = async () => {
-        if (account && initialize_nft_batch) { 
+        if (account && initialize_nft_batch) {
             setMinting(1);
             initialize_nft_batch({ account, tokensID, supply });
             // console.log('transactionStatus', transactionStatus);
         }
     }
     React.useEffect(() => {
-        if (minting==1 && !submitting) {
-          if (transactionStatus) console.log('Minting transaction status', transactionStatus.code);
-          if (transactionStatus && (transactionStatus.code == 'REJECTED')) {
-            setMinting(2);
-          } else if (submitting == false && transactionStatus && (transactionStatus.code == 'ACCEPTED_ON_L1' || transactionStatus.code == 'ACCEPTED_ON_L2')) {
-            setMinting(0);
-            setStep(1);
-          }
+        if (minting == 1 && !submitting) {
+            if (transactionStatus) console.log('Minting transaction status', transactionStatus.code);
+            if (transactionStatus && (transactionStatus.code == 'REJECTED')) {
+                setMinting(2);
+            } else if (submitting == false && transactionStatus && (transactionStatus.code == 'ACCEPTED_ON_L1' || transactionStatus.code == 'ACCEPTED_ON_L2')) {
+                setMinting(0);
+                setStep(1);
+            }
         }
-      }, [minting, submitting, transactionStatus])
+    }, [minting, submitting, transactionStatus])
 
 
     // -------------------------  Bridge NFT to L1 ------------------------------
 
     const bridgeBatchFront = async () => {
         setBridgeState(1);
-        const tx = await bridgeToL1(tokensID as [], supply as [], l1_address as string);
-       // @ts-ignore
+        console.log("Metamask account: ", metamaskAccount)
+        const tx = await bridgeToL1(tokensID as [], supply as [], l1_token_address as string, metamaskAccount as string);
+        // @ts-ignore
         if (tx && tx.transaction_hash) {
             // @ts-ignore
             addTransaction(tx);
@@ -107,7 +107,7 @@ export function Process({ contract }: { contract?: Contract }) {
         }
     };
 
-    return(
+    return (
         <>
             <div className="alert alert-info background-neutral">
                 <div className="flex-1">
@@ -127,17 +127,17 @@ export function Process({ contract }: { contract?: Contract }) {
                 </ul>
             </div>
 
-            {step == 0 && 
+            {step == 0 &&
                 <>
                     <div className="grid grid-cols-1">
-                        <p className="text-center mt-2">To test the bridge mint some test tokens on Starknet</p><br/>
+                        <p className="text-center mt-2">To test the bridge mint some test tokens on Starknet</p><br />
                         <div className="center-cnt">
-                            <ConnectedOnly> 
+                            <ConnectedOnly>
                                 <button
                                     className={minting == 0 ? "btn btn-primary my-2 mx-2" : "btn btn-primary my-2 mx-2 loading"}
                                     onClick={() => MintNFT()}
                                 >Mint a batch of NFTs to test</button>
-                                {minting==1 && transactionStatus ? <p>Transaction status: {transactionStatus.code} </p> : ''}
+                                {minting == 1 && transactionStatus ? <p>Transaction status: {transactionStatus.code} </p> : ''}
 
                                 <button className="btn btn-primary mx-2" onClick={() => setStep(1)}>Bridge your existing NFTs to L1</button>
                             </ConnectedOnly>
@@ -146,30 +146,30 @@ export function Process({ contract }: { contract?: Contract }) {
                             <button className="btn btn-secondary mx-2 my-2" onClick={() => setStep(3)}>Mint NFTs already bridged on L1</button>
                         </div>
                     </div>
-                </> 
+                </>
             }
-            {step == 1 && 
+            {step == 1 &&
                 <>
                     <div className="grid grid-cols-2 gap-3 px-10">
                         <div className="card rounded-lg shadow-2xl px-10 py-5 mb-3">
-                            {parseInt(balanceOf1) != 0 || parseInt(balanceOf2) != 0 ? 
+                            {parseInt(balanceOf1) != 0 || parseInt(balanceOf2) != 0 ?
                                 <>
                                     <ListOwnedTokens address={address} balanceOf1={balanceOf1} balanceOf2={balanceOf2} />
                                 </>
-                            : 
-                            ''}
+                                :
+                                ''}
                         </div>
                         <div className="card rounded-lg shadow-2xl px-10 py-5 mb-3">
 
                             {!approvedGateway ?
-                                    <ConnectedOnly>
-                                        <SetApproval />
-                                    </ConnectedOnly>
-                                    :
-                                    <>
-                                        <p>You can now bridge your NFTs to L1</p>
-                                        <button className={bridgeState == 0 ? "btn btn-accent mr-2" : "btn btn-accent mr-2 loading"} onClick={() => bridgeBatchFront()}>Bridge to L1</button>
-                                    </>
+                                <ConnectedOnly>
+                                    <SetApproval />
+                                </ConnectedOnly>
+                                :
+                                <>
+                                    <p>You can now bridge your NFTs to L1</p>
+                                    <button className={bridgeState == 0 ? "btn btn-accent mr-2" : "btn btn-accent mr-2 loading"} onClick={() => bridgeBatchFront()}>Bridge to L1</button>
+                                </>
 
                             }
                             <ul className="mt-4">
@@ -196,16 +196,16 @@ export function Process({ contract }: { contract?: Contract }) {
                     </div>
                 </>
             }
-            {step == 2 && 
+            {step == 3 &&
                 <>
                     <div className="grid grid-cols-2 gap-3 px-10">
                         <div className="card rounded-lg shadow-2xl px-10 py-5 mb-3">
-                            {parseInt(balanceOf1) != 0 || parseInt(balanceOf2) != 0 ? 
+                            {parseInt(balanceOf1) != 0 || parseInt(balanceOf2) != 0 ?
                                 <>
                                     <ListOwnedTokens address={address} balanceOf1={balanceOf1} balanceOf2={balanceOf2} />
                                 </>
-                            : 
-                            ''}
+                                :
+                                ''}
                         </div>
                         <div className="card rounded-lg shadow-2xl px-10 py-5 mb-3">
                             {
@@ -222,16 +222,16 @@ export function Process({ contract }: { contract?: Contract }) {
                         </div>
 
                     </div>
-                
+
                 </>
-            
+
             }
-             {step == 3 &&
+            {step == 4 &&
                 <>
                     <div className="card rounded-lg shadow-2xl px-10 py-5 mb-3">
-                            <ConnectedWallet>
-                                <MintNFTonL1 tokensID={[1, 2]} supply={[5, 10]} />
-                            </ConnectedWallet>
+                        <ConnectedWallet>
+                            <MintNFTonL1 tokensID={[1, 2]} supply={[5, 10]} />
+                        </ConnectedWallet>
                         <ul className="mt-4">
                             <li><b>Ethereum ERC1155 contract:</b> <EtherscanLink.Contract contract={l1_token_address} /></li>
                             <li><b>Ethereum Gateway contract:</b> <EtherscanLink.Contract contract={l1_address} /></li>
@@ -241,7 +241,7 @@ export function Process({ contract }: { contract?: Contract }) {
                     </div>
 
                 </>
-            } 
+            }
         </>
     );
 

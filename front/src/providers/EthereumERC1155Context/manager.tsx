@@ -13,6 +13,7 @@ import { utils } from "ethers";
 interface EthereumERC1155ManagerState {
     l1_address: string;
     l1_token_address: string
+    metamaskAccount: string
     abi: utils.Interface;
     l2_address: string;
     l2_token_address: string;
@@ -25,6 +26,10 @@ interface SetL1Address {
 interface SetL1TokenAddress {
     type: "set_l1_token_address";
     l1_token_address: string;
+}
+interface SetMetamaskAccount {
+    type: "set_metamaskAccount";
+    metamaskAccount: string;
 }
 interface SetAbi {
     type: "set_abi";
@@ -40,7 +45,7 @@ interface SetL2TokenAddress {
 }
 
 
-type Action = SetL1Address | SetL1TokenAddress | SetAbi | SetL2Address | SetL2TokenAddress;
+type Action = SetL1Address | SetL1TokenAddress | SetAbi | SetL2Address | SetL2TokenAddress | SetMetamaskAccount;
 
 function reducer(
     state: EthereumERC1155ManagerState,
@@ -56,6 +61,9 @@ function reducer(
         case "set_l1_token_address": {
             return { ...state, l1_token_address: action.l1_token_address };
         }
+        case "set_metamaskAccount": {
+            return { ...state, metamaskAccount: action.metamaskAccount };
+        }
         default: {
             return state;
         }
@@ -69,16 +77,18 @@ const fetching = (...args: AsyncState[]): boolean => {
 export function useEthereumERC1155Manager(): EthereumERC1155State {
 
     const ethers = useEthers();
+    const { account } = useEthers();
     const [timer, setTimer] = useState(Date.now());
     const [txHash, setTxHash] = useState("");
     const [state, dispatch] = React.useReducer(reducer, {
         l1_address: '',
         l1_token_address: '',
+        metamaskAccount: '',
         abi: new utils.Interface(Gateway1155Abi),
         l2_address: '',
         l2_token_address: '',
     });
-    const { l1_address, l1_token_address, abi, l2_address, l2_token_address } = state;
+    const { l1_address, l1_token_address, metamaskAccount, abi, l2_address, l2_token_address } = state;
 
     useEffect(() => {
         const tid = setTimeout(() => {
@@ -112,6 +122,13 @@ export function useEthereumERC1155Manager(): EthereumERC1155State {
             dispatch({ type: "set_l1_address", l1_address: SolidityGateway1155.address });
         }
     }, [SolidityGateway1155, l1_address])
+
+    useEffect(() => {
+        if (account) {
+            dispatch({ type: "set_metamaskAccount", metamaskAccount: account });
+        }
+    }, [account, metamaskAccount])
+
 
 
     // useEffect(() => {
@@ -175,7 +192,8 @@ export function useEthereumERC1155Manager(): EthereumERC1155State {
     const bridgeFromL2 = useCallback(async (tokenId: [], amounts: []) => {
         console.log("L1TOKEN:", SolidityBridge1155.address)
         console.log("L2TOKEN:", StarknetBridged1155.address)
-
+        console.log("ID: ", tokenId)
+        console.log("Amounts: ", amounts)
         bridgeSend(SolidityBridge1155.address, StarknetBridged1155.address, tokenId, amounts)
         // dispatch({ type: "set_approval_tx", approvalTx: bridgeState });
 
@@ -188,6 +206,6 @@ export function useEthereumERC1155Manager(): EthereumERC1155State {
     }, [bridgeState.transaction?.hash])
 
 
-    return { l1_address, l1_token_address, l2_address, l2_token_address, txHash, bridgeFromL2, bridgeState, mintFromL2, mintState };
+    return { l1_address, l1_token_address, metamaskAccount, l2_address, l2_token_address, txHash, bridgeFromL2, bridgeState, mintFromL2, mintState };
 
 }
