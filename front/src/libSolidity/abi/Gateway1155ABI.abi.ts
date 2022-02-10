@@ -18,12 +18,6 @@ export const Gateway1155Abi = [
                 "internalType": "address",
                 "name": "addr",
                 "type": "address"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "salt",
-                "type": "uint256"
             }
         ],
         "name": "Deployed",

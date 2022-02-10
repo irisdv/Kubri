@@ -62,14 +62,18 @@ export function Process({ contract }: { contract?: Contract }) {
 
     // -------------------------  Bridge NFT to L1 ------------------------------
 
+
+
     const bridgeBatchFront = async () => {
         setBridgeState(1);
         console.log("Metamask account: ", metamaskAccount)
+        console.log("L1_tokenAdd: ", l1_token_address)
         const tx = await bridgeToL1(tokensID as [], supply as [], l1_token_address as string, metamaskAccount as string);
         // @ts-ignore
         if (tx && tx.transaction_hash) {
             // @ts-ignore
             addTransaction(tx);
+            // setTransactionBridge()
         }
     }
 
@@ -196,7 +200,7 @@ export function Process({ contract }: { contract?: Contract }) {
                     </div>
                 </>
             }
-            {step == 3 &&
+            {step == 2 &&
                 <>
                     <div className="grid grid-cols-2 gap-3 px-10">
                         <div className="card rounded-lg shadow-2xl px-10 py-5 mb-3">
@@ -226,7 +230,7 @@ export function Process({ contract }: { contract?: Contract }) {
                 </>
 
             }
-            {step == 4 &&
+            {step == 3 &&
                 <>
                     <div className="card rounded-lg shadow-2xl px-10 py-5 mb-3">
                         <ConnectedWallet>

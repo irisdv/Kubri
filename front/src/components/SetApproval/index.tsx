@@ -2,6 +2,9 @@ import React from "react";
 import { Contract } from "starknet";
 import { useStarknetERC1155Manager } from '../../providers/StarknetERC1155Context';
 import { useTransactions } from "../../providers/TransactionsProvider";
+// import { useStarknetInvoke } from "../../lib/hooks";
+// import { useStarknet } from "../../providers/StarknetProvider";
+// import { useStarknetCall } from "../../lib/hooks";
 
 export function SetApproval({ contract }: { contract?: Contract }) {
     const { addTransaction } = useTransactions();
@@ -20,6 +23,7 @@ export function SetApproval({ contract }: { contract?: Contract }) {
             if (data && data[0] && data[0].code && (data[0].code == 'REJECTED')) {
                 setApprovalState(0)
             } else if (data && data[0] && (data[0].code == 'ACCEPTED_ON_L1' || data[0].code == 'ACCEPTED_ON_L2')) {
+                console.log('tx pour set approval est bien passée on peut passer au bridge')
                 setApprovalState(2);
             }
         }

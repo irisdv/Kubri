@@ -9,6 +9,8 @@ export function BridgeNFTonL1({ contract, tokensID, supply }: { contract?: Contr
     const [endpointState, setEndpointState] = React.useState(0);
 
     React.useEffect(() => {
+        console.log("STATUS2: ", bridgeState.status)
+        console.log('transHash: ', bridgeState.transaction?.hash)
         if (bridgeState.status === 'Success') {
             setEndpointState(2);
         }

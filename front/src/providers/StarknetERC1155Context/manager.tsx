@@ -169,7 +169,7 @@ export function useStarknetERC1155Manager(): StarknetERC1155State {
 	}, [timer, starknet.starknet, starknet.account, address]);
 
 	useEffect(() => {
-		if (starknet.starknet && starknet.account && address && !approvalTx && approvedGateway == false) {
+		if (starknet.starknet && starknet.account && address && approvedGateway == false) {
 			setTimeout(async () => {
 				let _hasBeenApproved;
 				try {
@@ -187,6 +187,7 @@ export function useStarknetERC1155Manager(): StarknetERC1155State {
 					console.log('error', e);
 				}
 				if (_hasBeenApproved && _hasBeenApproved.result && _hasBeenApproved.result[0] && parseInt(hexToDecimalString(_hasBeenApproved.result[0])) == 1) {
+					console.log("IS APPROVED")
 					dispatch({ type: "set_approved_gateway", approvedGateway: true });
 				}
 			}, 0);
