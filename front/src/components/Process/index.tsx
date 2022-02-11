@@ -11,7 +11,6 @@ import { useEthereumERC1155Manager } from '../../providers/EthereumERC1155Contex
 import { EtherscanLink } from "../EtherscanLink";
 
 import { ConnectedOnly } from "../ConnectedOnly";
-import { SetApproval } from "../SetApproval";
 import { ListOwnedTokens } from "../ListOwnedTokens";
 import { ConnectedWallet } from "../ConnectedWallet";
 import { BridgeNFTonL1 } from "../BridgeOnL1";
@@ -20,12 +19,12 @@ import { MintNFTonL1 } from "../MintNFTOnL1";
 
 export function Process({ contract }: { contract?: Contract }) {
     const { account } = useStarknet();
-    const { address, balanceOf1, balanceOf2, approvedGateway, bridgeToL1 } = useStarknetERC1155Manager();
+    const { address, balanceOf1, balanceOf2, approvalTx, approveUser, approvedGateway, bridgeToL1 } = useStarknetERC1155Manager();
     const { txHash, l1_address, l1_token_address, metamaskAccount } = useEthereumERC1155Manager();
     const { addTransaction } = useTransactions();
     const { transactions } = useTransactions();
 
-    const [step, setStep] = useState(0);
+    const [step, setStep] = useState(1);
     const [minting, setMinting] = useState(0);
     const supply = [5, 10];
     const tokensID = [1, 2];
@@ -36,6 +35,7 @@ export function Process({ contract }: { contract?: Contract }) {
     } = useStarknetInvoke(contract, "initialize_nft_batch");
     const transactionStatus = useTransaction(hash);
 
+    const [approvalState, setApprovalState] = React.useState(0);
     const [bridgeState, setBridgeState] = useState(0);
 
     // -------------------------   Mint NFT ------------------------------
@@ -59,10 +59,36 @@ export function Process({ contract }: { contract?: Contract }) {
         }
     }, [minting, submitting, transactionStatus])
 
+    // -------------------------  Set Approval ------------------------------
+
+    React.useEffect(() => {
+        if (approvalState == 0 && approvedGateway == true) {
+            setApprovalState(2);
+        }
+        if (approvalState == 1) {
+            console.log('approval ongoing');
+            var data = transactions.filter((transactions) => (transactions.hash) === approvalTx);
+            console.log('data', data);
+            if (data && data[0] && data[0].code && (data[0].code == 'REJECTED')) {
+                setApprovalState(0)
+            } else if (data && data[0] && (data[0].code == 'ACCEPTED_ON_L1' || data[0].code == 'ACCEPTED_ON_L2')) {
+                console.log('tx pour set approval est bien passée on peut passer au bridge')
+                setApprovalState(2);
+            }
+        }
+    }, [approvalState, transactions, approvalTx, approvedGateway])
+
+    const approveUserFront = async () => {
+        setApprovalState(1);
+        const tx = await approveUser(address as string);
+        // @ts-ignore
+        if (tx && tx.transaction_hash) {
+            // @ts-ignore
+            addTransaction(tx);
+        }
+    }
 
     // -------------------------  Bridge NFT to L1 ------------------------------
-
-
 
     const bridgeBatchFront = async () => {
         setBridgeState(1);
@@ -76,7 +102,6 @@ export function Process({ contract }: { contract?: Contract }) {
             // setTransactionBridge()
         }
     }
-
 
     // Helper functions
     const range = (start: number, stop: number, step: number) => {
@@ -143,7 +168,7 @@ export function Process({ contract }: { contract?: Contract }) {
                                 >Mint a batch of NFTs to test</button>
                                 {minting == 1 && transactionStatus ? <p>Transaction status: {transactionStatus.code} </p> : ''}
 
-                                <button className="btn btn-primary mx-2" onClick={() => setStep(1)}>Bridge your existing NFTs to L1</button>
+                                <button className="btn btn-primary mx-2" onClick={() => setStep(1)}>Already have some test tokens ? Bridge them to L1</button>
                             </ConnectedOnly>
                         </div>
                         <div className="center-cnt">
@@ -165,9 +190,12 @@ export function Process({ contract }: { contract?: Contract }) {
                         </div>
                         <div className="card rounded-lg shadow-2xl px-10 py-5 mb-3">
 
-                            {!approvedGateway ?
+                            {approvalState==0 || approvalState==1  ?
                                 <ConnectedOnly>
-                                    <SetApproval />
+                                    <p>To bridge your NFTs to L1 first you need to set approval for the gateway contract to transfer your NFTs</p>
+                                    <div className="center-cnt">
+                                        <button className={approvalState == 0 ? "btn btn-accent my-2" : "btn btn-accent my-2 loading"} onClick={() => approveUserFront()}>Set Approval</button>
+                                    </div>
                                 </ConnectedOnly>
                                 :
                                 <>

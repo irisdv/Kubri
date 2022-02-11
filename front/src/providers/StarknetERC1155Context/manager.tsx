@@ -170,6 +170,7 @@ export function useStarknetERC1155Manager(): StarknetERC1155State {
 
 	useEffect(() => {
 		if (starknet.starknet && starknet.account && address && approvedGateway == false) {
+			console.log('dans use effect approval');
 			setTimeout(async () => {
 				let _hasBeenApproved;
 				try {
@@ -186,8 +187,9 @@ export function useStarknetERC1155Manager(): StarknetERC1155State {
 				} catch (e) {
 					console.log('error', e);
 				}
+				console.log()
 				if (_hasBeenApproved && _hasBeenApproved.result && _hasBeenApproved.result[0] && parseInt(hexToDecimalString(_hasBeenApproved.result[0])) == 1) {
-					console.log("IS APPROVED")
+					console.log("IS APPROVED if statement")
 					dispatch({ type: "set_approved_gateway", approvedGateway: true });
 				}
 			}, 0);

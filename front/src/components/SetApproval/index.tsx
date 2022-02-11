@@ -1,10 +1,8 @@
+import { convertLegacyProps } from "antd/lib/button/button";
 import React from "react";
 import { Contract } from "starknet";
 import { useStarknetERC1155Manager } from '../../providers/StarknetERC1155Context';
 import { useTransactions } from "../../providers/TransactionsProvider";
-// import { useStarknetInvoke } from "../../lib/hooks";
-// import { useStarknet } from "../../providers/StarknetProvider";
-// import { useStarknetCall } from "../../lib/hooks";
 
 export function SetApproval({ contract }: { contract?: Contract }) {
     const { addTransaction } = useTransactions();
