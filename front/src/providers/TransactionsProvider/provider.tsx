@@ -38,7 +38,13 @@ export function TransactionsProvider({
       const checkTransaction = async (tx: StoredTransaction) => {
         console.log(`checking tx status ${tx.hash}`);
         console.log(tx.code);
-        if (tx.code === "REJECTED" || tx.code === "ACCEPTED_ON_L2" || tx.code === "ACCEPTED_ON_L1") {
+        if (tx.code === "ACCEPTED_ON_L2") {
+          const newStatus = await library.getTransactionStatus(tx.hash);
+          if (newStatus.tx_status == tx.code) {
+            return tx;
+          }
+        }
+        if (tx.code === "REJECTED" || tx.code === "ACCEPTED_ON_L1") {
           return tx;
         }
 

@@ -47,7 +47,13 @@ interface SetApprovedGateway {
 	approvedGateway: boolean;
 }
 
-type Action = SetAddress | SetValid | SetBalanceOf1 | SetBalanceOf2 | setApprovalTx | SetApprovedGateway;
+interface SetBridgingTx {
+	type: "set_bridging_tx";
+	bridgingTx: string;
+}
+
+
+type Action = SetAddress | SetValid | SetBalanceOf1 | SetBalanceOf2 | setApprovalTx | SetApprovedGateway | SetBridgingTx;
 
 function reducer(
 	state: StarknetERC1155ManagerState,
@@ -68,6 +74,9 @@ function reducer(
 		}
 		case "set_approval_tx": {
 			return { ...state, approvalTx: action.approvalTx };
+		}
+		case "set_bridging_tx": {
+			return { ...state, bridgingTx: action.bridgingTx };
 		}
 		case "set_approved_gateway": {
 			return { ...state, approvedGateway: action.approvedGateway };
@@ -209,6 +218,32 @@ export function useStarknetERC1155Manager(): StarknetERC1155State {
 	}, [starknet.starknet, starknet.account])
 
 	// Set up function Bridge to L1
+	// useEffect(() => {
+	// 	if (starknet.starknet && starknet.account && bridgingTx) {
+	// 		setTimeout(async () => {
+	// 			let _hasBeenApproved;
+	// 			try {
+	// 				_hasBeenApproved = await starknet.starknet.provider.callContract({
+	// 					contract_address: address,
+	// 					entry_point_selector: getSelectorFromName('is_approved_for_all'),
+	// 					calldata: [
+	// 						BigNumber.from(starknet.account).toString(),
+	// 						BigNumber.from(StarknetGateway1155.address).toString()
+	// 					]
+	// 				})
+	// 				console.log('hasBeenApproved', _hasBeenApproved.result[0]);
+
+	// 			} catch (e) {
+	// 				console.log('error', e);
+	// 			}
+	// 			if (_hasBeenApproved && _hasBeenApproved.result && _hasBeenApproved.result[0] && parseInt(hexToDecimalString(_hasBeenApproved.result[0])) == 1) {
+	// 				console.log("IS APPROVED")
+	// 				dispatch({ type: "set_approved_gateway", approvedGateway: true });
+	// 			}
+	// 		}, 0);
+	// 	}
+	// }, [starknet.starknet, starknet.account, bridgingTx])
+
 	const bridgeToL1 = useCallback(async (tokenId: [], amounts: [], _l1_token_address: string, metamaskAccount: string) => {
 
 		if (starknet.starknet && starknet.gateway) {
@@ -235,7 +270,8 @@ export function useStarknetERC1155Manager(): StarknetERC1155State {
 				// ]
 			);
 			console.log(tx);
-			return 0;
+			dispatch({ type: "set_bridging_tx", bridgingTx: tx.transaction_hash });
+			return tx;
 		}
 
 	}, [starknet.account, starknet.gateway, starknet.starknet]);

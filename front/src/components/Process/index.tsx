@@ -20,7 +20,7 @@ import { MintNFTonL1 } from "../MintNFTOnL1";
 
 export function Process({ contract }: { contract?: Contract }) {
     const { account } = useStarknet();
-    const { address, balanceOf1, balanceOf2, approvedGateway, bridgeToL1 } = useStarknetERC1155Manager();
+    const { address, balanceOf1, balanceOf2, approvedGateway, bridgingTx, bridgeToL1 } = useStarknetERC1155Manager();
     const { txHash, l1_address, l1_token_address, metamaskAccount } = useEthereumERC1155Manager();
     const { addTransaction } = useTransactions();
     const { transactions } = useTransactions();
@@ -35,7 +35,6 @@ export function Process({ contract }: { contract?: Contract }) {
         submitting
     } = useStarknetInvoke(contract, "initialize_nft_batch");
     const transactionStatus = useTransaction(hash);
-
     const [bridgeState, setBridgeState] = useState(0);
 
     // -------------------------   Mint NFT ------------------------------
@@ -62,17 +61,36 @@ export function Process({ contract }: { contract?: Contract }) {
 
     // -------------------------  Bridge NFT to L1 ------------------------------
 
-
+    React.useEffect(() => {
+        console.log("code: ", bridgingTx);
+        if (bridgeState == 1) {
+            var data = transactions.filter((transactions) => (transactions.hash) === bridgingTx);
+            console.log(data)
+            // if (bridgeTxStatus) console.log('Bridge transaction status', bridgeTxStatus.code);
+            if (data && data[0] && data[0].code && (data[0].code == 'REJECTED')) {
+                setBridgeState(0)
+            } else if (data && data[0] && (data[0].code == 'ACCEPTED_ON_L1')) {
+                console.log('tx pour set approval est bien passée on peut passer au bridge')
+                setBridgeState(2);
+                setStep(2);
+            }
+        }
+    }, [bridgeState, bridgingTx, transactions])
 
     const bridgeBatchFront = async () => {
         setBridgeState(1);
         console.log("Metamask account: ", metamaskAccount)
         console.log("L1_tokenAdd: ", l1_token_address)
-        const tx = await bridgeToL1(tokensID as [], supply as [], l1_token_address as string, metamaskAccount as string);
+        const tx: any = bridgeToL1(tokensID as [], supply as [], l1_token_address as string, metamaskAccount as string);
         // @ts-ignore
         if (tx && tx.transaction_hash) {
+
             // @ts-ignore
             addTransaction(tx);
+            // @ts-ignore
+            console.log("tx", tx);
+            // @ts-ignore
+            // bridgeTxStatus = useTransaction(tx.transaction_hash)
             // setTransactionBridge()
         }
     }
