@@ -14,6 +14,9 @@ export function BridgeNFTonL1({ contract, tokensID, supply }: { contract?: Contr
         if (bridgeState.status === 'Success') {
             setEndpointState(2);
         }
+        else if (bridgeState.status === "Exception" || bridgeState.status === "Fail") {
+            setEndpointState(0);
+        }
     }, [bridgeState.status, endpointState])
 
     const BridgeOnL1Front = async () => {

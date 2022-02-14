@@ -84,6 +84,7 @@ export function Process({ contract }: { contract?: Contract }) {
         const tx = await approveUser(address as string);
         // @ts-ignore
         if (tx && tx.transaction_hash) {
+            console.log("tx1: ", tx);
             // @ts-ignore
             addTransaction(tx);
         }
@@ -93,6 +94,7 @@ export function Process({ contract }: { contract?: Contract }) {
 
     React.useEffect(() => {
         console.log("code: ", bridgingTx);
+        console.log("transaction: ", transactions)
         if (bridgeState == 1) {
             var data = transactions.filter((transactions) => (transactions.hash) === bridgingTx);
             console.log(data)
@@ -111,14 +113,12 @@ export function Process({ contract }: { contract?: Contract }) {
         setBridgeState(1);
         console.log("Metamask account: ", metamaskAccount)
         console.log("L1_tokenAdd: ", l1_token_address)
-        const tx: any = bridgeToL1(tokensID as [], supply as [], l1_token_address as string, metamaskAccount as string);
-        // @ts-ignore
-        if (tx && tx.transaction_hash) {
+        const tx: any = await bridgeToL1(tokensID as [], supply as [], l1_token_address as string, metamaskAccount as string);
 
+        if (tx && tx.transaction_hash) {
+            console.log("tx2: ", tx);
             // @ts-ignore
             addTransaction(tx);
-            // @ts-ignore
-            console.log("tx", tx);
             // @ts-ignore
             // bridgeTxStatus = useTransaction(tx.transaction_hash)
             // setTransactionBridge()
@@ -166,6 +166,14 @@ export function Process({ contract }: { contract?: Contract }) {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                     <label className="text-primary">You can mint NFT already Bridge on L1<a className="color-accent underline" onClick={() => setStep(3)}> Mint NFT</a></label>
+                </div>
+            </div>
+            <div className="alert alert-info background-neutral">
+                <div className="flex-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="w-6 h-6 mx-2 stroke-current text-primary">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <label className="text-primary">Consume NFT already Bridge To L1<a className="color-accent underline" onClick={() => setStep(2)}> Consume NFT</a></label>
                 </div>
             </div>
 
