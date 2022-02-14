@@ -17,8 +17,33 @@
         }
       ],
       "name": "consumeMessageFromL2",
-      "outputs": [],
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "msgHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "l2ToL1Messages",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -40,7 +65,13 @@
         }
       ],
       "name": "sendMessageToL2",
-      "outputs": [],
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
       "stateMutability": "nonpayable",
       "type": "function"
     }

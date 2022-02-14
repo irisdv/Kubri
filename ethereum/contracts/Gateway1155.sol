@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import "./BridgeErc1155.sol";
-import "./FakeErc1155.sol";
 import "./IStarknetCore.sol";
 import "./Factory.sol";
 
@@ -26,17 +25,9 @@ contract Gateway1155 {
         initialEndpointGatewaySetter = msg.sender;
     }
 
-    // struct NFTIdAmounts {
-    //     uint256[] _tokensId;
-    //     uint256[] _amounts;
-    // }
     mapping(address => bool) private _isDeployed;
-    // mapping(address => address) private _listeBridgeContract;
-    // mapping(address => uint256[]) private _listeIDByOwner;
     mapping(address => mapping(uint256 => uint256))
         private _listeTokensIDAmount;
-
-    // mapping(address => mapping(uint256 => bool)) private _idExist;
 
     event Deployed(address addr);
 
@@ -163,47 +154,9 @@ contract Gateway1155 {
         return starknetCore.l2ToL1Messages(msgHash) > 0;
     }
 
-    // function debug_bridgeFromStarknetAvailable(
-    //     ERC1155 _l1TokenContract,
-    //     uint256 _l2TokenContract,
-    //     uint256[] memory _tokensId,
-    //     uint256[] memory _amounts
-    // ) external view returns (bytes32) {
-    //     uint256 size = 4 + (_tokensId.length * 2);
-    //     uint256 index = 0;
-    //     uint256[] memory payload = new uint256[](size);
-    //     // build withdraw message payload
-    //     payload[0] = BRIDGE_MODE_WITHDRAW;
-    //     payload[1] = addressToUint(msg.sender);
-    //     payload[2] = addressToUint(address(_l1TokenContract));
-    //     payload[3] = _l2TokenContract;
-
-    //     for (uint256 i = 4; i < size; i++) {
-    //         require(
-    //             index < _tokensId.length,
-    //             "You can not access to that element"
-    //         );
-    //         payload[i] = _tokensId[index];
-    //         i++;
-    //         payload[i] = _amounts[index];
-    //         index++;
-    //     }
-
-    //     bytes32 msgHash = keccak256(
-    //         abi.encodePacked(
-    //             endpointGateway,
-    //             addressToUint(address(this)),
-    //             payload.length,
-    //             payload
-    //         )
-    //     );
-
-    //     return msgHash;
-    // }
-
     // Bridging back from Starknet
     function bridgeFromStarknet(
-        FakeErc1155 _l1TokenContract,
+        ERC1155 _l1TokenContract,
         uint256 _l2TokenContract,
         uint256[] memory _tokensId,
         uint256[] memory _amounts
@@ -236,21 +189,8 @@ contract Gateway1155 {
         // consum withdraw message
         starknetCore.consumeMessageFromL2(endpointGateway, payload);
 
-        // bytes memory bytecode = this.getBytecode();
-        // address newContractAdd = this.getAddress(bytecode, 0x123456788);
-        // if (_listeBridgeContract[msg.sender] != newContractAdd) {
-        //     address deployBridgeAdd = deploy(bytecode, 0x123456788);
-        //     require(
-        //         deployBridgeAdd == newContractAdd,
-        //         "Address deployed is not the same than the predicted one"
-        //     );
-        //     _listeBridgeContract[msg.sender] = newContractAdd;
-        // }
         for (uint256 i = 0; i < _tokensId.length; i++) {
             _listeTokensIDAmount[msg.sender][_tokensId[i]] += _amounts[i];
-            // if (!_idExist[msg.sender][_tokensId[i]]) {
-            //     _listeIDByOwner[msg.sender].push(_tokensId[i]);
-            // }
             i++;
         }
     }
@@ -268,27 +208,14 @@ contract Gateway1155 {
                 "Precompute address and deployed address are not the same"
             );
             _isDeployed[deployBridgeAdd] = true;
-            // bridge.mintNFT(msg.sender, _tokensId, _amounts);
         }
         BridgeErc1155 bridge = BridgeErc1155(newContractAdd);
         bridge.mintNFT(msg.sender, _tokensId, _amounts);
-        // require(
-        //     _listeBridgeContract[msg.sender] != address(0),
-        //     "Bridge contract address can not be zero"
-        // );
-        // address bridgeAddress = _listeBridgeContract[msg.sender];
-        // BridgeErc1155 bridge = BridgeErc1155(bridgeAddress);
-        // bridge.mintNFT(msg.sender, _tokensId, _amounts);
         for (uint256 i = 0; i < _tokensId.length; i++) {
             _listeTokensIDAmount[msg.sender][_tokensId[i]] -= _amounts[i];
-            // _listeIDByOwner[msg.sender].pop(_tokensId[i]);
             i++;
         }
     }
-
-    // function getIdByOwner() external view returns (uint256[] memory) {
-    //     return _listeIDByOwner[msg.sender];
-    // }
 
     // 1. Get bytecode of contract to be deployed
     function getBytecode() external view returns (bytes memory) {

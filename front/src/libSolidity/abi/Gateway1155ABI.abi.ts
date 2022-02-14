@@ -26,7 +26,7 @@ export const Gateway1155Abi = [
     {
         "inputs": [
             {
-                "internalType": "contract FakeErc1155",
+                "internalType": "contract ERC1155",
                 "name": "_l1TokenContract",
                 "type": "address"
             },

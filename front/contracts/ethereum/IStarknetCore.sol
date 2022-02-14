@@ -22,4 +22,9 @@ interface IStarknetCore {
         uint256 fromAddress,
         uint256[] calldata payload
     ) external returns (bytes32);
+
+    /**
+      Message registry
+     */
+    function l2ToL1Messages(bytes32 msgHash) external view returns (uint256);
 }
