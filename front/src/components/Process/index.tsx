@@ -25,7 +25,7 @@ export function Process({ contract }: { contract?: Contract }) {
     const { addTransaction } = useTransactions();
     const { transactions } = useTransactions();
 
-    const [step, setStep] = useState(1);
+    const [step, setStep] = useState(0);
     const [minting, setMinting] = useState(0);
     const supply = [5, 10];
     const tokensID = [1, 2];
