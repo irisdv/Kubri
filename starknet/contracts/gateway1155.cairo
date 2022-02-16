@@ -11,6 +11,10 @@ const BRIDGE_MODE_WITHDRAW = 1
 
 @contract_interface
 namespace IBridgedERC1155:
+    func safe_batch_transfer_from(
+            _from : felt, to : felt, tokens_id_len : felt, tokens_id : felt*, amounts_len : felt,
+            amounts : felt*):
+    end
     func safe_is_approved(_from : felt):
     end
 
@@ -95,14 +99,24 @@ func bridge_to_mainnet{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
         amounts=_amounts)
 
     let (l1_gateway_address) = l1_gateway.read()
+    let (contract_address) = get_contract_address()
 
-    IBridgedERC1155.delete_token_batch(
+    IBridgedERC1155.safe_batch_transfer_from(
         contract_address=_l2_token_address,
-        owner=caller_address,
+        _from=caller_address,
+        to=contract_address,
         tokens_id_len=_tokens_id_len,
         tokens_id=_tokens_id,
         amounts_len=_amounts_len,
         amounts=_amounts)
+
+    # IBridgedERC1155.delete_token_batch(
+    #     contract_address=_l2_token_address,
+    #     owner=caller_address,
+    #     tokens_id_len=_tokens_id_len,
+    #     tokens_id=_tokens_id,
+    #     amounts_len=_amounts_len,
+    #     amounts=_amounts)
 
     let payload_size = (4 + (_tokens_id_len * 2))
     let (message_payload : felt*) = alloc()

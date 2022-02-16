@@ -47,6 +47,10 @@ end
 func get_tokenId(owner : felt, index : felt) -> (res : felt):
 end
 
+@storage_var
+func _totalSupply(id : felt) -> (res : felt):
+end
+
 # ERC1155 returns the same URI for all token types.
 # We use struct as felt can only store string whose length is at most 31 characters
 # Client calling the function must replace the '{id}' substring with the actual token type ID
@@ -80,7 +84,6 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
 
     return ()
 end
-
 
 #
 # Initializer
@@ -154,6 +157,8 @@ func _mint{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
     let (max) = max_mint.read()
     # let (already_mint) = _amount_minted.read(owner=to)
     # assert_lt(already_mint + amount, max)
+    _before_token_transfer(_from=0, to=to, id=token_id, amount=amount)
+
     let (res) = balances.read(owner=to, token_id=token_id)
     balances.write(to, token_id, res + amount)
     # _amount_minted.write(owner=to, already_mint + amount)
@@ -178,6 +183,27 @@ func _mint_batch{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_p
         amounts=amounts + 1)
 end
 
+func _before_token_transfer{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
+        _from : felt, to : felt, id : felt, amount : felt) -> ():
+    alloc_locals
+    let (local res : felt) = _totalSupply.read(id)
+    if _from == to:
+        return ()
+    end
+    if _from == 0:
+        # tempvar pedersen_ptr : HashBuiltin* = pedersen_ptr
+        # tempvar syscall_ptr : felt* = syscall_ptr
+        _totalSupply.write(id, res + amount)
+    else:
+        if to == 0:
+            _totalSupply.write(id, res - amount)
+        else:
+            return ()
+        end
+    end
+    return ()
+end
+
 #
 # Getters
 #
@@ -185,7 +211,8 @@ end
 # Returns the same URI for all tokens type ID
 # Client calling the function must replace the {id} substring with the actual token type ID
 @view
-func uri{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(token_id : felt) -> (res : TokenUri):
+func uri{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(token_id : felt) -> (
+        res : TokenUri):
     let (res) = _uri.read(token_id)
     return (res)
 end
@@ -367,12 +394,14 @@ end
 
 func _transfer_from{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
         sender : felt, recipient : felt, token_id : felt, amount : felt):
+    alloc_locals
     # check recipient != 0
     assert_not_zero(recipient)
 
     # validate sender has enough funds
     let (sender_balance) = balances.read(owner=sender, token_id=token_id)
     assert_nn_le(amount, sender_balance)
+    _before_token_transfer(sender, recipient, token_id, amount)
 
     # substract from sender
     balances.write(sender, token_id, sender_balance - amount)
@@ -427,6 +456,8 @@ func _burn{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
     let (from_balance) = balance_of(_from, token_id)
     assert_le(amount, from_balance)
     balances.write(_from, token_id, from_balance - amount)
+    _before_token_transfer(_from=_from, to=0, id=token_id, amount=amount)
+
     return ()
 end
 
