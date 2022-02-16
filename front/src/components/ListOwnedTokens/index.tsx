@@ -17,10 +17,6 @@ export function ListOwnedTokens({ address, balanceOf1, balanceOf2 }: { address?:
     const [image2, setImage2] = useState('');
 
     useEffect(() => {
-
-        // const test = useTokenURI('ipfs://bafkreierzdc5kkrbxmkooj2wt2jx4pebvne5nko4qzowpurj5hr7l4kv7u');
-        // console.log('test', test);
-
         if (balanceOf1 && parseInt(balanceOf1) > 0) {
             setTimeout(async () => {
                 let _token_uri;
@@ -30,35 +26,22 @@ export function ListOwnedTokens({ address, balanceOf1, balanceOf2 }: { address?:
                         entry_point_selector: getSelectorFromName('uri'),
                         calldata: ['1']
                     })
-                    console.log('token uri', _token_uri);
+                    // console.log('token uri', _token_uri);
                 } catch (e) {
-                    console.log('error with uri', e)
+                    console.log('error while fetching uri', e)
                 }
                 if (_token_uri && _token_uri.result) {
                     const first = decodeShortString(_token_uri.result[0]);
                     const last = decodeShortString(_token_uri.result[1])
                     const all = first + last;
-                    console.log('all', all);
-                    // const tokenUriData = await axios.get("https://ipfs.infura.io/ipfs/bafkreierzdc5kkrbxmkooj2wt2jx4pebvne5nko4qzowpurj5hr7l4kv7u", { responseType: 'blob' })
-                    setMetadata1(await (await axios.get("https://ipfs.io/ipfs/QmYqYBbou6fcqiUJTksevTewi7sysJzEs9BzcVkzmFi2sm/1.json")).data)
-
-                    // if (metadata != null) {
-                    //     console.log('metaData', await metadata.files());
-                    // }
-                    // console.log('tokenUriData', tokenUriData.data.image);
-                    // console.log('tokenUriData', tokenUriData.data.image_url);
-                    // ipfs://bafkreierzdc5kkrbxmkooj2wt2jx4pebvne5nko4qzowpurj5hr7l4kv7u
-                    // setUriA(tokenUriData.data.image_url);
+                    const metadata = await axios.get("https://ipfs.io/ipfs/"+all+"/1.json");
+                    setMetadata1(metadata.data);
                 }
             }, 0);
         }
     }, [balanceOf1])
 
     useEffect(() => {
-
-        // const test = useTokenURI('ipfs://bafkreierzdc5kkrbxmkooj2wt2jx4pebvne5nko4qzowpurj5hr7l4kv7u');
-        // console.log('test', test);
-
         if (balanceOf2 && parseInt(balanceOf2) > 0) {
             setTimeout(async () => {
                 let _token_uri;
@@ -68,32 +51,24 @@ export function ListOwnedTokens({ address, balanceOf1, balanceOf2 }: { address?:
                         entry_point_selector: getSelectorFromName('uri'),
                         calldata: ['1']
                     })
-                    console.log('token uri', _token_uri);
+                    // console.log('token uri', _token_uri);
                 } catch (e) {
-                    console.log('error with uri', e)
+                    console.log('error while fetching uri', e)
                 }
                 if (_token_uri && _token_uri.result) {
                     const first = decodeShortString(_token_uri.result[0]);
                     const last = decodeShortString(_token_uri.result[1])
                     const all = first + last;
-                    console.log('all', all);
-                    // const tokenUriData = await axios.get("https://ipfs.infura.io/ipfs/bafkreierzdc5kkrbxmkooj2wt2jx4pebvne5nko4qzowpurj5hr7l4kv7u", { responseType: 'blob' })
-                    setMetadata2(await (await axios.get("https://ipfs.io/ipfs/QmYqYBbou6fcqiUJTksevTewi7sysJzEs9BzcVkzmFi2sm/2.json")).data)
-
-                    // if (metadata != null) {
-                    //     console.log('metaData', await metadata.files());
-                    // }
-                    // console.log('tokenUriData', tokenUriData.data.image);
-                    // console.log('tokenUriData', tokenUriData.data.image_url);
-                    // ipfs://bafkreierzdc5kkrbxmkooj2wt2jx4pebvne5nko4qzowpurj5hr7l4kv7u
-                    // setUriA(tokenUriData.data.image_url);
+                    const metadata = await axios.get("https://ipfs.io/ipfs/"+all+"/2.json");
+                    setMetadata2(metadata.data);
+                    // console.log('metadata2', metadata);
                 }
             }, 0);
         }
     }, [balanceOf2])
 
     useEffect(() => {
-        console.log(metadata1)
+        // console.log('metadata1', metadata1)
         if (metadata1) {
             let url;
             if (metadata1.image) {
@@ -104,7 +79,7 @@ export function ListOwnedTokens({ address, balanceOf1, balanceOf2 }: { address?:
     }, [metadata1]);
 
     useEffect(() => {
-        console.log(metadata2)
+        // console.log('metadata2', metadata2)
         if (metadata2) {
             let url;
             if (metadata2.image) {
