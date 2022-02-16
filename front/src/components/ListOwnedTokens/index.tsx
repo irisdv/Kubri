@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useStarknet } from "../../providers/StarknetProvider";
+import { useStarknetERC1155Manager } from '../../providers/StarknetERC1155Context';
 import { number, stark, shortString } from 'starknet';
 const { hexToDecimalString } = number;
 const { getSelectorFromName } = stark;
 const { decodeShortString } = shortString;
 
-export function ListOwnedTokens({ address, balanceOf1, balanceOf2 }: { address?: string, balanceOf1?: string, balanceOf2: string }) {
+export function ListOwnedTokens({ address }: { address?: string }) {
 
     const starknet = useStarknet();
+    const { balanceOf1, balanceOf2 } = useStarknetERC1155Manager();
     const [uri1, setUri1] = useState('');
     const [uri2, setUri2] = useState('');
     const [metadata1, setMetadata1] = useState(null as any);
@@ -61,7 +63,6 @@ export function ListOwnedTokens({ address, balanceOf1, balanceOf2 }: { address?:
                     const all = first + last;
                     const metadata = await axios.get("https://ipfs.io/ipfs/"+all+"/2.json");
                     setMetadata2(metadata.data);
-                    // console.log('metadata2', metadata);
                 }
             }, 0);
         }
@@ -91,24 +92,28 @@ export function ListOwnedTokens({ address, balanceOf1, balanceOf2 }: { address?:
 
 
     return (
-        <div>
-            <p>Your NFTs on Starknet</p>
-            {balanceOf1 && parseInt(balanceOf1) > 0 &&
-                <>
-                    <div>
-                        <img src={image1}></img>
-                        <p>supply: {balanceOf1}</p>
-                    </div>
-                </>
-            }
-            {balanceOf2 && parseInt(balanceOf2) > 0 &&
-                <>
-                    <div>
-                        <img src={image2}></img>
-                        <p>supply: {balanceOf2}</p>
-                    </div>
-                </>
-            }
-        </div>
+        <>
+        { parseInt(balanceOf1) != 0 || parseInt(balanceOf2) != 0 ?
+            <div>
+                <p>Your NFTs on Starknet</p>
+                {balanceOf1 && parseInt(balanceOf1) > 0 &&
+                    <>
+                        <div>
+                            <img src={image1}></img>
+                            <p>supply: {balanceOf1}</p>
+                        </div>
+                    </>
+                }
+                {balanceOf2 && parseInt(balanceOf2) > 0 &&
+                    <>
+                        <div>
+                            <img src={image2}></img>
+                            <p>supply: {balanceOf2}</p>
+                        </div>
+                    </>
+                }
+            </div>
+        : 'You don\'t own any tokens.' }
+        </>
     );
 }

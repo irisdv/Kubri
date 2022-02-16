@@ -211,12 +211,7 @@ export function Process({ contract }: { contract?: Contract }) {
                 <>
                     <div className="grid grid-cols-2 gap-3 px-10">
                         <div className="card rounded-lg shadow-2xl px-10 py-5 mb-3">
-                            {parseInt(balanceOf1) != 0 || parseInt(balanceOf2) != 0 ?
-                                <>
-                                    <ListOwnedTokens address={address} balanceOf1={balanceOf1} balanceOf2={balanceOf2} />
-                                </>
-                                :
-                                ''}
+                                    <ListOwnedTokens address={address} />
                         </div>
                         <div className="card rounded-lg shadow-2xl px-10 py-5 mb-3">
 
@@ -262,12 +257,7 @@ export function Process({ contract }: { contract?: Contract }) {
                 <>
                     <div className="grid grid-cols-2 gap-3 px-10">
                         <div className="card rounded-lg shadow-2xl px-10 py-5 mb-3">
-                            {parseInt(balanceOf1) != 0 || parseInt(balanceOf2) != 0 ?
-                                <>
-                                    <ListOwnedTokens address={address} balanceOf1={balanceOf1} balanceOf2={balanceOf2} />
-                                </>
-                                :
-                                ''}
+                            <ListOwnedTokens address={address} />
                         </div>
                         <div className="card rounded-lg shadow-2xl px-10 py-5 mb-3">
                             {
