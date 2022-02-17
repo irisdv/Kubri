@@ -1,6 +1,8 @@
-# Mekhenty (Egyptian for Passer) is an ERC-1155 bridge for Starknet.
+# Kubri (Egyptian for Bridge) is an ERC-1155 bridge for Starknet.
 based on (https://github.com/mortimr/qasr):
 create2 based on  (https://github.com/miguelmota/solidity-create2-example)
+
+You can try our Live -> https://kubribridge.vercel.app/
 
 The repository consists of 3 folders : 
 1. Starknet folder : all cairo contracts + tests and deployment scripts (using pytest and starknet-hardhat-plugin)
