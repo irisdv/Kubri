@@ -7,9 +7,9 @@ interface LinkProps {
 
 function Link({ href, children }: LinkProps) {
   return (
-      <a className="text-primary" href={href}>
-        {children}
-      </a>
+    <a className="text-primary" onClick={() => window.open(href, "_blank")}>
+      {children}
+    </a>
   );
 }
 

@@ -1,5 +1,6 @@
 # Mekhenty (Egyptian for Passer) is an ERC-1155 bridge for Starknet.
 based on (https://github.com/mortimr/qasr):
+create2 based on  (https://github.com/miguelmota/solidity-create2-example)
 
 The repository consists of 3 folders : 
 1. Starknet folder : all cairo contracts + tests and deployment scripts (using pytest and starknet-hardhat-plugin)
@@ -7,15 +8,12 @@ The repository consists of 3 folders :
 3. Front folder : react app to interact with folders
 
 
-Here's the qasr : L1 -> L2 flow:
+Kubri : L2 -> L1 flow:
 
-- On L1 we create a gateway (you will find it in ethereum/contracts/Gateway.sol).
-- On L2 we create another gateway (you will find it in starknet/contracts/gateway.cairo).
-- On L2 we create a mirror NFT contract of the NFT we wish to bridge (this should be done once, by the creator of the NFT on L1).
-- We then take our NFT on L1 and send it to our L1 gateway by calling the "warptoStarknet" method.
-- The L1 gateway send a message to the L2 gateway
-- The L2 gateway receives the message and handles it in `bridge_from_mainnet`. The gateway creates `mint credits` corresponding to a right to claim an NFT.
-- The L2 user can now go and "claim" his NFT to the L2 gateway with `consume_mint_credit`. The gateway will call the L2 smart-contract and mint the appropriate NFT (see function `create_token`).
-- If there is an issue with the `consume_mint_credit` call (ex: target contract reverts), L2 users can call `revoke_mint_credit`.
+- On L2 we create a gateway (you will find it in starknet/contracts/gateway1155.cairo).
+- On L1 we create a gateway (you will find it in ethereum/contracts/Gateway1155.sol).
+- On L2 we create a mirror NFT contract of the NFT we wish to bridge. We mint a certain amount of token and send a message to the L1 gateway through the function bridge_to_mainnet.
+- ON L1 gateway we can consume the message send from L2 through the function bridgeFromStarknet.
+- Then you can call mintNFTFromStarknet that deploye the contract BridgeERC1155.sol (this should be done once by the first use who want to mint his NFT on L1) and allows you to mint the NFT bridge from L2 on L1.
 
-The L2 -> L1 basically works by reverting these steps. Please note that currently, you can only bridge from L2 to L1 an NFT that originated from L1. Meaning native L2 NFT to L1 is NOT supported by Qasr (yet!).
+Soon you will be able to bridge back your NFT to L2.
