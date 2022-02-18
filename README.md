@@ -16,6 +16,6 @@ Kubri : L2 -> L1 flow:
 - On L1 we create a gateway (you will find it in ethereum/contracts/Gateway1155.sol).
 - On L2 we create a mirror NFT contract of the NFT we wish to bridge. We mint a certain amount of token and send a message to the L1 gateway through the function bridge_to_mainnet.
 - ON L1 gateway we can consume the message send from L2 through the function bridgeFromStarknet.
-- Then you can call mintNFTFromStarknet that deploye the contract BridgeERC1155.sol (this should be done once by the first use who want to mint his NFT on L1) and allows you to mint the NFT bridge from L2 on L1.
+- Then you can call mintNFTFromStarknet that deploys the contract BridgeERC1155.sol (this should be done once by the first user who wants to mint bridged NFTs on L1). It allows users to mint NFTs bridge from L2 on L1.
 
 Soon you will be able to bridge back your NFT to L2.
