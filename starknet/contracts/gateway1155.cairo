@@ -6,6 +6,7 @@ from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.messages import send_message_to_l1
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.math import assert_not_zero
+from starkware.starknet.common.syscalls import get_contract_address
 
 const BRIDGE_MODE_WITHDRAW = 1
 
@@ -273,14 +274,23 @@ func consume_mint_credit{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     let (l1_token_address) = IBridgedERC1155.get_l1_address(contract_address=_l2_token_address)
 
     assert l1_token_address = _l1_token_address
+    let (contract_address) = get_contract_address()
 
-    IBridgedERC1155.create_token_batch(
+    IBridgedERC1155.safe_batch_transfer_from(
         contract_address=_l2_token_address,
-        owner=_l2_owner,
+        _from=contract_address,
+        to=_l2_owner,
         tokens_id_len=_tokens_id_len,
         tokens_id=_tokens_id,
         amounts_len=_amounts_len,
         amounts=_amounts)
+    # IBridgedERC1155.create_token_batch(
+    #     contract_address=_l2_token_address,
+    #     owner=_l2_owner,
+    #     tokens_id_len=_tokens_id_len,
+    #     tokens_id=_tokens_id,
+    #     amounts_len=_amounts_len,
+    #     amounts=_amounts)
 
     write_custody_l2(
         l2_token_address=_l2_token_address,
@@ -325,6 +335,15 @@ func bridge_from_mainnet{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
         amounts_len=_amounts_len,
         amounts=_amounts,
         owner=_owner)
+
+    consume_mint_credit(
+        _l1_token_address=_l1_token_address,
+        _l2_token_address=_l2_token_address,
+        _tokens_id_len=_tokens_id_len,
+        _tokens_id=_tokens_id,
+        _amounts_len=_amounts_len,
+        _amounts=_amounts,
+        _l2_owner=_owner)
 
     return ()
 end

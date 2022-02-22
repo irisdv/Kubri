@@ -15,6 +15,7 @@ import { ListOwnedTokens } from "../ListOwnedTokens";
 import { ConnectedWallet } from "../ConnectedWallet";
 import { BridgeNFTonL1 } from "../BridgeOnL1";
 import { MintNFTonL1 } from "../MintNFTOnL1";
+import { BridgeBack } from "../BridgeBack";
 
 
 export function Process({ contract }: { contract?: Contract }) {
@@ -211,7 +212,7 @@ export function Process({ contract }: { contract?: Contract }) {
                 <>
                     <div className="grid grid-cols-2 gap-3 px-10">
                         <div className="card rounded-lg shadow-2xl px-10 py-5 mb-3">
-                                    <ListOwnedTokens address={address} />
+                            <ListOwnedTokens address={address} />
                         </div>
                         <div className="card rounded-lg shadow-2xl px-10 py-5 mb-3">
 
@@ -290,6 +291,27 @@ export function Process({ contract }: { contract?: Contract }) {
                             <li><b>Ethereum Transaction:</b> <EtherscanLink.Transaction transactionHash={txHash} /></li>
                         </ul>
 
+                    </div>
+
+                </>
+            }
+            {step == 4 &&
+                <>
+                    <div className="grid grid-cols-2 gap-3 px-10">
+                        <div className="card rounded-lg shadow-2xl px-10 py-5 mb-3">
+                            <ListOwnedTokens address={address} />
+                        </div>
+                        <div className="card rounded-lg shadow-2xl px-10 py-5 mb-3">
+                            <ConnectedWallet>
+                                <BridgeBack tokensID={[1, 2]} supply={[5, 10]} />
+                            </ConnectedWallet>
+                            <ul className="mt-4">
+                                <li><b>Ethereum ERC1155 contract:</b> <EtherscanLink.Contract contract={l1_token_address} /></li>
+                                <li><b>Ethereum Gateway contract:</b> <EtherscanLink.Contract contract={l1_address} /></li>
+                                <li><b>Ethereum Transaction:</b> <EtherscanLink.Transaction transactionHash={txHash} /></li>
+                            </ul>
+
+                        </div>
                     </div>
 
                 </>

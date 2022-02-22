@@ -23,10 +23,15 @@ contract BridgeErc1155 is ERC1155 {
     ) external {
         require(msg.sender == gatewayAddress, "You are not Gateway Contract");
         _mintBatch(_to, _tokensId, _amounts, "");
-        // uint256 currentTotalSupply = totalSupply();
-        // for (uint256 tokenIdx = 0; tokenIdx < _amount; ++tokenIdx) {
-        //     _mint(_to, currentTotalSupply + tokenIdx);
-        // }
+    }
+
+    function burnNFT(
+        address _to,
+        uint256[] memory _tokensId,
+        uint256[] memory _amounts
+    ) external {
+        require(msg.sender == gatewayAddress, "You are not Gateway Contract");
+        _burnBatch(_to, _tokensId, _amounts);
     }
 
     function uri(uint256 _id) public pure override returns (string memory) {

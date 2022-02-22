@@ -12,6 +12,8 @@ export interface EthereumERC1155State {
     bridgeState: TransactionStatus;
     mintFromL2: (t: [], u: []) => void;
     mintState: TransactionStatus;
+    bridgeBack: (t: [], u: [], a: string) => void;
+    bridgeBackState: TransactionStatus;
 }
 
 // export const EthereumERC1155Context = React.createContext<EthereumERC1155ContextInterface>({
@@ -27,5 +29,8 @@ export const ETHEREUM_ERC1155_INITIAL_STATE: EthereumERC1155State = {
     bridgeState: null,
     mintFromL2: () => { },
     // @ts-ignore
-    mintState: null
+    mintState: null,
+    bridgeBack: () => { },
+    // @ts-ignore
+    bridgeBackState: null,
 }

@@ -72,40 +72,6 @@ export const Gateway1155Abi = [
                 "internalType": "uint256[]",
                 "name": "_amounts",
                 "type": "uint256[]"
-            }
-        ],
-        "name": "bridgeFromStarknetAvailable",
-        "outputs": [
-            {
-                "internalType": "bool",
-                "name": "",
-                "type": "bool"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "contract ERC1155",
-                "name": "_l1TokenContract",
-                "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "_l2TokenContract",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256[]",
-                "name": "_tokensId",
-                "type": "uint256[]"
-            },
-            {
-                "internalType": "uint256[]",
-                "name": "_amounts",
-                "type": "uint256[]"
             },
             {
                 "internalType": "uint256",

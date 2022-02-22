@@ -205,7 +205,26 @@ export function useEthereumERC1155Manager(): EthereumERC1155State {
         }
     }, [bridgeState.transaction?.hash])
 
+    // Set up function Bridge back
+    const { send: bridgeBackSend, state: bridgeBackState } = useContractFunction(new Contract(SolidityGateway1155.address, Gateway1155Abi, ethers.library), 'bridgeToStarknet', { transactionName: "Bridge Back token to L2" });
 
-    return { l1_address, l1_token_address, metamaskAccount, l2_address, l2_token_address, txHash, bridgeFromL2, bridgeState, mintFromL2, mintState };
+    const bridgeBack = useCallback(async (tokenId: [], amounts: [], argentAccount: string) => {
+        console.log("TOKENS LIST:", tokenId)
+        console.log("AMOUNTS LIST:", amounts)
+        console.log("Argent account LIST:", argentAccount)
+        bridgeBackSend(SolidityBridge1155.address, StarknetBridged1155.address, tokenId, amounts, argentAccount)
+        // dispatch({ type: "set_approval_tx", approvalTx: mintState });
+
+    }, [bridgeBackSend]);
+
+    React.useEffect(() => {
+        console.log("Herre", bridgeBackState.transaction?.hash)
+        if (bridgeBackState.transaction?.hash) {
+            setTxHash(bridgeBackState.transaction?.hash)
+        }
+    }, [bridgeBackState.transaction?.hash])
+
+
+    return { l1_address, l1_token_address, metamaskAccount, l2_address, l2_token_address, txHash, bridgeFromL2, bridgeState, mintFromL2, mintState, bridgeBack, bridgeBackState };
 
 }
