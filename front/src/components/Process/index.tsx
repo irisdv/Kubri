@@ -177,6 +177,14 @@ export function Process({ contract }: { contract?: Contract }) {
                     <label className="text-primary">Consume NFT already Bridge To L1<a className="color-accent underline" onClick={() => setStep(2)}> Consume NFT</a></label>
                 </div>
             </div>
+            <div className="alert alert-info background-neutral">
+                <div className="flex-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="w-6 h-6 mx-2 stroke-current text-primary">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <label className="text-primary">Bridge Back NFT to L2<a className="color-accent underline" onClick={() => setStep(4)}> Bridge Back</a></label>
+                </div>
+            </div>
 
             <div className="p-5">
                 <ul className="w-full steps">
@@ -184,6 +192,7 @@ export function Process({ contract }: { contract?: Contract }) {
                     <li data-content={step < 2 ? "2" : "✓"} className={step < 1 ? "step" : "step step-accent"}>Bridge to L1</li>
                     <li data-content={step < 3 ? "3" : "✓"} className={step < 2 ? "step" : "step step-accent"}>Get your NFTs on L1</li>
                     <li data-content={step < 4 ? "4" : "✓"} className={step < 3 ? "step" : "step step-accent"}>Mint NFT on L1</li>
+                    <li data-content={step < 5 ? "5" : "✓"} className={step < 4 ? "step" : "step step-accent"}>Bridge Back on L2</li>
                 </ul>
             </div>
 
