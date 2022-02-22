@@ -294,7 +294,7 @@ func consume_mint_credit{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
 
     write_custody_l2(
         l2_token_address=_l2_token_address,
-        l1_token_address=_l1_token_address,
+        l1_token_address=0,
         tokens_id_len=_tokens_id_len,
         tokens_id=_tokens_id,
         amounts_len=_amounts_len,
